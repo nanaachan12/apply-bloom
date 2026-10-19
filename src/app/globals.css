@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Light Mode Palette: Inspired by Olive Sage reference + Fresh Strawberry Pink */
+  --color-olive-primary: #788B4E;
+  --color-olive-dark: #63733E;
+  --color-olive-sidebar: #7B8E50;
+  --color-olive-light: #EEF3E2;
+  --color-olive-folder: #D5E0BF;
+  --color-strawberry-pink: #F45B88;
+  --color-strawberry-pink-dark: #C2255C;
+  --color-strawberry-pink-light: #FFF0F3;
+  --color-strawberry-pink-border: #FDC4D0;
+  --color-canvas-bg: #EDF2E4;
+  --color-panel-bg: #FFFFFF;
+  --color-panel-border: #DEE7D0;
+  --color-text-main: #242D22;
+  --color-text-muted: #647363;
+}
+
+.dark {
+  /* Dark Mode Palette: Tactical Masculine Deep Forest / Gunmetal Sage */
+  --color-olive-primary: #9BC358;
+  --color-olive-dark: #7FA341;
+  --color-olive-sidebar: #131A14;
+  --color-olive-light: #1E281F;
+  --color-olive-folder: #273429;
+  --color-strawberry-pink: #F45B88;
+  --color-strawberry-pink-dark: #FA7194;
+  --color-strawberry-pink-light: #2A141A;
+  --color-strawberry-pink-border: #4D1D28;
+  --color-canvas-bg: #0C100D;
+  --color-panel-bg: #141A15;
+  --color-panel-border: #232E25;
+  --color-text-main: #F1F6F2;
+  --color-text-muted: #8E9F90;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  color: var(--color-text-main);
+  background-color: var(--color-canvas-bg);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+/* Refined Subtle Micro-Animations */
+@keyframes sway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes dropWater {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.9);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(24px) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(45, 90, 67, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(45, 90, 67, 0.3));
+  }
+}
+
+.animate-sway {
+  animation: sway 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+.animate-water-drop {
+  animation: dropWater 0.8s ease-in forwards;
+}
+
+.animate-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar - Olive Sage & Dark Mode */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C2D1A8;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2A362D;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A6BA88;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3B4B3F;
+}

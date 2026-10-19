@@ -1,0 +1,59 @@
+declare module "lucide-react" {
+  import * as React from "react";
+  export interface LucideProps extends React.SVGProps<SVGSVGElement> {
+    size?: string | number;
+    color?: string;
+    strokeWidth?: string | number;
+  }
+  export type LucideIcon = React.ComponentType<LucideProps>;
+
+  export const LayoutDashboard: LucideIcon;
+  export const Briefcase: LucideIcon;
+  export const KanbanSquare: LucideIcon;
+  export const CalendarCheck: LucideIcon;
+  export const CalendarCheck2: LucideIcon;
+  export const Flower2: LucideIcon;
+  export const Settings: LucideIcon;
+  export const X: LucideIcon;
+  export const Sparkles: LucideIcon;
+  export const Flame: LucideIcon;
+  export const Menu: LucideIcon;
+  export const LogOut: LucideIcon;
+  export const User: LucideIcon;
+  export const Plus: LucideIcon;
+  export const Search: LucideIcon;
+  export const Filter: LucideIcon;
+  export const ArrowUpDown: LucideIcon;
+  export const Building: LucideIcon;
+  export const MapPin: LucideIcon;
+  export const DollarSign: LucideIcon;
+  export const ExternalLink: LucideIcon;
+  export const Calendar: LucideIcon;
+  export const Clock: LucideIcon;
+  export const Trash2: LucideIcon;
+  export const Edit2: LucideIcon;
+  export const Edit3: LucideIcon;
+  export const CheckCircle2: LucideIcon;
+  export const AlertCircle: LucideIcon;
+  export const Sprout: LucideIcon;
+  export const TreePine: LucideIcon;
+  export const Award: LucideIcon;
+  export const Lock: LucideIcon;
+  export const Droplets: LucideIcon;
+  export const HelpCircle: LucideIcon;
+  export const TrendingUp: LucideIcon;
+  export const ShieldCheck: LucideIcon;
+  export const Users: LucideIcon;
+  export const ArrowRight: LucideIcon;
+  export const ChevronRight: LucideIcon;
+  export const Eye: LucideIcon;
+  export const Code2: LucideIcon;
+  export const Mail: LucideIcon;
+  export const CheckSquare: LucideIcon;
+  export const MoreVertical: LucideIcon;
+  export const Zap: LucideIcon;
+  export const BarChart3: LucideIcon;
+  export const Activity: LucideIcon;
+  export const Sun: LucideIcon;
+  export const Moon: LucideIcon;
+}

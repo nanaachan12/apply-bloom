@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ApplicationStatus {
+  WISHLIST
+  APPLIED
+  SCREENING
+  ASSESSMENT
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum ReminderType {
+  INTERVIEW
+  ASSESSMENT
+  FOLLOW_UP
+  DEADLINE
+  OTHER
+}
+
+model User {
+  id             String                @id @default(uuid()) @db.VarChar(36)
+  name           String                @db.VarChar(100)
+  email          String                @unique @db.VarChar(191)
+  passwordHash   String                @db.VarChar(255)
+  timezone       String                @default("Asia/Jakarta") @db.VarChar(50)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  applications   Application[]
+  profile        GamificationProfile?
+  xpTransactions XpTransaction[]
+  userBadges     UserBadge[]
+}
+
+model Application {
+  id             String            @id @default(uuid()) @db.VarChar(36)
+  userId         String            @db.VarChar(36)
+  company        String            @db.VarChar(150)
+  position       String            @db.VarChar(150)
+  location       String?           @db.VarChar(150)
+  employmentType EmploymentType?
+  salaryMin      Float?
+  salaryMax      Float?
+  currency       String            @default("IDR") @db.VarChar(10)
+  source         String?           @db.VarChar(100)
+  jobUrl         String?           @db.VarChar(500)
+  status         ApplicationStatus @default(WISHLIST)
+  appliedAt      DateTime?
+  notes          String?           @db.Text
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events         ApplicationEvent[]
+  reminders      Reminder[]
+
+  @@index([userId, status])
+  @@index([userId, updatedAt])
+  @@index([userId, appliedAt])
+}
+
+model ApplicationEvent {
+  id            String             @id @default(uuid()) @db.VarChar(36)
+  applicationId String             @db.VarChar(36)
+  fromStatus    ApplicationStatus?
+  toStatus      ApplicationStatus?
+  description   String?            @db.VarChar(500)
+  occurredAt    DateTime           @default(now())
+
+  application   Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, occurredAt])
+}
+
+model Reminder {
+  id            String       @id @default(uuid()) @db.VarChar(36)
+  applicationId String       @db.VarChar(36)
+  title         String       @db.VarChar(255)
+  type          ReminderType @default(OTHER)
+  dueAt         DateTime
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+
+  application   Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, dueAt])
+}
+
+model GamificationProfile {
+  id             String    @id @default(uuid()) @db.VarChar(36)
+  userId         String    @unique @db.VarChar(36)
+  totalXp        Int       @default(0)
+  level          Int       @default(1)
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActiveDate DateTime?
+  plantStage     Int       @default(0)
+  updatedAt      DateTime  @updatedAt
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model XpTransaction {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  userId     String   @db.VarChar(36)
+  sourceType String   @db.VarChar(50)
+  sourceId   String   @db.VarChar(36)
+  amount     Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sourceType, sourceId])
+  @@index([userId, createdAt])
+}
+
+model Badge {
+  id          String      @id @default(uuid()) @db.VarChar(36)
+  code        String      @unique @db.VarChar(50)
+  name        String      @db.VarChar(100)
+  description String      @db.VarChar(255)
+  icon        String      @db.VarChar(50)
+  threshold   Int?
+  createdAt   DateTime    @default(now())
+
+  userBadges  UserBadge[]
+}
+
+model UserBadge {
+  userId   String   @db.VarChar(36)
+  badgeId  String   @db.VarChar(36)
+  earnedAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeId])
+}
