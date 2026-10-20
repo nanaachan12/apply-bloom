@@ -16,6 +16,7 @@ import { AppLayout, useApp } from "@/components/layout/AppLayout";
 import { PlantVisual } from "@/components/garden/PlantVisual";
 import { BadgeGrid } from "@/components/garden/BadgeGrid";
 import { Button } from "@/components/ui/Button";
+import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { BadgeDto, XpTransactionDto } from "@/types";
 import { PLANT_STAGES, XP_RULES } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
@@ -73,10 +74,13 @@ export default function BloomGardenPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading flex items-center gap-2">
+      {isLoading ? (
+        <WireframeSkeleton type="garden" />
+      ) : (
+        <div className="space-y-8">
+          {/* Header */}
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading flex items-center gap-2">
             <Flower2 size={24} className="text-[#788B4E] dark:text-[#9BC358]" />
             <span>Bloom Garden</span>
           </h2>
@@ -270,6 +274,7 @@ export default function BloomGardenPage() {
           </div>
         </div>
       </div>
+      )}
     </AppLayout>
   );
 }

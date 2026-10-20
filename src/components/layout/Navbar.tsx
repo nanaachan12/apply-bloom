@@ -80,10 +80,10 @@ export function Navbar({
           )}
         </button>
 
-        {/* Streak Pill - Fresh Strawberry Pink */}
+        {/* Streak Pill - Fresh Strawberry Pink (Hidden on small mobile for clean header) */}
         <div
           title={`${profile?.currentStreak ?? 1} hari aktif berturut-turut`}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold bg-[#FFF0F3] dark:bg-[#2A141A] text-[#C2255C] dark:text-[#FA7194] border border-[#FDC4D0] dark:border-[#4D1D28] shadow-2xs cursor-default transition-colors"
+          className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold bg-[#FFF0F3] dark:bg-[#2A141A] text-[#C2255C] dark:text-[#FA7194] border border-[#FDC4D0] dark:border-[#4D1D28] shadow-2xs cursor-default transition-colors"
         >
           <Flame size={13} className="text-[#F45B88]" />
           <span>{profile?.currentStreak ?? 1} Hari</span>
@@ -99,16 +99,17 @@ export function Navbar({
           <span>{profile?.totalXp ?? 0} XP</span>
         </Link>
 
-        {/* Add Application Button */}
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={onAddApplication}
-          className="hidden sm:inline-flex"
-        >
-          <Plus size={14} />
-          <span>Tambah Lamaran</span>
-        </Button>
+        {/* Add Application Button (Desktop only) */}
+        <div className="hidden sm:block">
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={onAddApplication}
+          >
+            <Plus size={14} className="shrink-0" />
+            <span>Tambah Lamaran</span>
+          </Button>
+        </div>
 
         {/* User Avatar & Menu Dropdown */}
         <div className="relative">

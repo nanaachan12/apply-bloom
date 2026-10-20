@@ -8,6 +8,7 @@ import {
   Sparkles,
   Building,
   ArrowRight,
+  Plus,
 } from "lucide-react";
 import { ApplicationDto } from "@/types";
 import {
@@ -20,6 +21,7 @@ interface PipelineBoardProps {
   applications: ApplicationDto[];
   onSelectApplication: (app: ApplicationDto) => void;
   onMoveStatus: (appId: string, newStatus: ApplicationStatusType) => void;
+  onAddCard?: (status: ApplicationStatusType) => void;
 }
 
 const PIPELINE_COLUMNS: ApplicationStatusType[] = [
@@ -36,6 +38,7 @@ export function PipelineBoard({
   applications,
   onSelectApplication,
   onMoveStatus,
+  onAddCard,
 }: PipelineBoardProps) {
   const getNextStatus = (
     current: ApplicationStatusType
@@ -180,6 +183,18 @@ export function PipelineBoard({
                   </div>
                 )}
               </div>
+
+              {/* Column Footer: Add Card Button matching reference UI */}
+              {onAddCard && (
+                <button
+                  type="button"
+                  onClick={() => onAddCard(colStatus)}
+                  className="mt-2.5 py-2 px-3 border border-dashed border-[#DEE7D0] dark:border-[#28382A] hover:border-[#788B4E] dark:hover:border-[#9BC358] rounded-2xl text-xs font-semibold text-[#616D64] dark:text-[#A0B2A3] hover:text-[#788B4E] dark:hover:text-[#9BC358] hover:bg-white dark:hover:bg-[#1A231B] flex items-center justify-center gap-1.5 transition-all cursor-pointer w-full"
+                >
+                  <Plus size={13} />
+                  <span>Tambah Lamaran</span>
+                </button>
+              )}
             </div>
           );
         })}

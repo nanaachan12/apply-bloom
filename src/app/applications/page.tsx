@@ -14,13 +14,14 @@ import { ApplicationTable } from "@/components/applications/ApplicationTable";
 import { ApplicationModal } from "@/components/applications/ApplicationModal";
 import { ApplicationDetailDrawer } from "@/components/applications/ApplicationDetailDrawer";
 import { ReminderModal } from "@/components/reminders/ReminderModal";
+import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { Button } from "@/components/ui/Button";
 import { ApplicationDto } from "@/types";
 import { APPLICATION_STATUS, ApplicationStatusType } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
 
 export default function ApplicationsPage() {
-  const { user, openAddModal, triggerXpCelebration } = useApp();
+  const { user, openAddModal, triggerXpCelebration, refreshTimestamp } = useApp();
 
   const [applications, setApplications] = useState<ApplicationDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -69,7 +70,7 @@ export default function ApplicationsPage() {
     if (user) {
       fetchApplications();
     }
-  }, [user, statusFilter, sortBy, sortOrder]);
+  }, [user, statusFilter, sortBy, sortOrder, refreshTimestamp]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,9 +159,12 @@ export default function ApplicationsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {isLoading ? (
+        <WireframeSkeleton type="applications" />
+      ) : (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading flex items-center gap-2">
               <span>My Applications</span>
@@ -252,6 +256,7 @@ export default function ApplicationsPage() {
           onDelete={handleDelete}
         />
       </div>
+      )}
 
       {/* Detail Drawer */}
       <ApplicationDetailDrawer

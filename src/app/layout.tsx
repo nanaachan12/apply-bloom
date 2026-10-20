@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   authors: [{ name: "ApplyBloom Team" }],
 };
 
+import { AppProvider } from "@/components/layout/AppLayout";
+
 export default function RootLayout({
   children,
 }: {
@@ -37,7 +39,9 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${poppins.variable} ${inter.variable}`}>
       <body className="min-h-screen font-sans bg-[#FAF7F2] text-[#282D29] antialiased selection:bg-[#D5E6D8] selection:text-[#204231]">
-        {children}
+        <AppProvider>
+          {children}
+        </AppProvider>
       </body>
     </html>
   );

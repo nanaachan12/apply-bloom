@@ -15,13 +15,15 @@ import {
 } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
+import { BottomNavbar } from "@/components/layout/BottomNavbar";
+import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { ApplicationModal } from "@/components/applications/ApplicationModal";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/api";
 import { UserSession, GamificationProfileDto } from "@/types";
 
-interface AppContextType {
+export interface AppContextType {
   user: UserSession | null;
   profile: GamificationProfileDto | null;
   isLoadingAuth: boolean;
@@ -30,6 +32,9 @@ interface AppContextType {
   refreshProfile: () => Promise<void>;
   openAddModal: () => void;
   triggerXpCelebration: (amount: number, reason?: string) => void;
+  refreshTimestamp: number;
+  triggerRefresh: () => void;
+  handleLogout: () => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -41,18 +46,39 @@ export const AppContext = createContext<AppContextType>({
   refreshProfile: async () => {},
   openAddModal: () => {},
   triggerXpCelebration: () => {},
+  refreshTimestamp: 0,
+  triggerRefresh: () => {},
+  handleLogout: async () => {},
 });
 
 export const useApp = () => useContext(AppContext);
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<UserSession | null>(null);
   const [profile, setProfile] = useState<GamificationProfileDto | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [refreshTimestamp, setRefreshTimestamp] = useState<number>(Date.now());
+
+  // Auth modal state for non-logged in visitors
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
+
+  // Floating XP toast
+  const [xpToast, setXpToast] = useState<{ amount: number; message: string } | null>(
+    null
+  );
+
+  const triggerRefresh = () => {
+    setRefreshTimestamp(Date.now());
+  };
 
   useEffect(() => {
     // Check saved theme or system preference
@@ -76,20 +102,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.remove("dark");
     }
   };
-
-  // Auth modal state for non-logged in visitors
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [authName, setAuthName] = useState("");
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
-
-  // Floating XP toast
-  const [xpToast, setXpToast] = useState<{ amount: number; message: string } | null>(
-    null
-  );
 
   const fetchAuthUser = async () => {
     try {
@@ -161,8 +173,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       // ignore
     }
   };
-
-  const pathname = usePathname();
 
   const triggerXpCelebration = (amount: number, reason?: string) => {
     setXpToast({
@@ -242,6 +252,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       await fetchAuthUser();
       setIsAuthModalOpen(false);
       triggerXpCelebration(10, "Selamat datang di ApplyBloom!");
+      triggerRefresh();
     } catch (err: any) {
       setAuthError(err.message || "Terjadi kesalahan");
     } finally {
@@ -288,6 +299,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       await fetchAuthUser();
       setIsAuthModalOpen(false);
       triggerXpCelebration(15, "Masuk sebagai akun Demo Rania Bloom");
+      triggerRefresh();
     } catch (err: any) {
       setAuthError(err.message || "Gagal login demo");
     } finally {
@@ -306,232 +318,210 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         refreshProfile,
         openAddModal: () => setIsAddModalOpen(true),
         triggerXpCelebration,
+        refreshTimestamp,
+        triggerRefresh,
+        handleLogout,
       }}
     >
-      <div className="min-h-screen bg-[#EDF2E4] dark:bg-[#0C100D] text-[#242D22] dark:text-[#F1F6F2] flex flex-col transition-colors duration-200">
-        {/* Sidebar (Desktop) */}
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          profile={profile}
-          onAddApplication={() => setIsAddModalOpen(true)}
-        />
+      {children}
 
-        {/* Main Content Area */}
-        <div className="lg:pl-64 flex-1 flex flex-col min-w-0">
-          <Navbar
-            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            user={user}
-            profile={profile}
-            onAddApplication={() => setIsAddModalOpen(true)}
-            onLogout={handleLogout}
-          />
-
-          <main className="flex-1 p-3 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
-            <div className="bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] rounded-3xl sm:rounded-[2.2rem] shadow-xs p-4 sm:p-7 min-h-[calc(100vh-6.5rem)] transition-colors duration-200">
-              {isLoadingAuth ? (
-                <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#EEF3E2] dark:bg-[#1E281F] border border-[#D5E0BF] dark:border-[#2C3B2E] flex items-center justify-center text-[#788B4E] dark:text-[#9BC358] shadow-2xs">
-                    <Flower2 size={24} className="animate-spin text-[#788B4E] dark:text-[#9BC358]" />
-                  </div>
-                  <p className="text-xs sm:text-sm font-semibold text-[#647363] dark:text-[#8E9F90]">
-                    Memuat data ApplyBloom...
-                  </p>
-                </div>
-              ) : (
-                children
-              )}
-            </div>
-          </main>
-        </div>
-
-        {/* Mobile Bottom Navigation Bar */}
-        <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-[#EEF3E2]/95 dark:bg-[#131A14]/95 backdrop-blur-md border-t border-[#DEE7D0] dark:border-[#232E25] px-2 py-1.5 flex items-center justify-around shadow-sm transition-colors duration-200">
-          {[
-            { label: "Dashboard", href: "/", icon: LayoutDashboard },
-            { label: "Lamaran", href: "/applications", icon: Briefcase },
-            { label: "Pipeline", href: "/pipeline", icon: KanbanSquare },
-            { label: "Agenda", href: "/reminders", icon: CalendarCheck },
-            { label: "Kebun", href: "/garden", icon: Flower2 },
-          ].map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] transition-all ${
-                  isActive
-                    ? "text-[#63733E] dark:text-[#9BC358] font-bold"
-                    : "text-[#647363] dark:text-[#8E9F90] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
-                }`}
-              >
-                <div
-                  className={`p-1 rounded-lg transition-colors ${
-                    isActive ? "bg-white dark:bg-[#233125] shadow-xs" : ""
-                  }`}
-                >
-                  <Icon
-                    size={18}
-                    className={isActive ? "text-[#63733E] dark:text-[#9BC358]" : "text-[#8E9F90]"}
-                  />
-                </div>
-                <span className="mt-0.5 tracking-tight">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Floating XP Toast */}
-        {xpToast && (
-          <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-white dark:bg-[#1B231C] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-lg rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-bottom duration-200 text-[#242D22] dark:text-[#F1F6F2]">
-            <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#233125] text-[#788B4E] dark:text-[#9BC358] flex items-center justify-center text-sm shadow-2xs">
-              <Sparkles size={16} />
-            </div>
-            <div>
-              <p className="font-bold text-xs text-[#2D5A43]">
-                +{xpToast.amount} XP DIDAPATKAN
-              </p>
-              <p className="text-xs text-[#282D29] font-medium mt-0.5">
-                {xpToast.message}
-              </p>
-            </div>
+      {/* Floating XP Toast */}
+      {xpToast && (
+        <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-white dark:bg-[#1B231C] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-lg rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-bottom duration-200 text-[#242D22] dark:text-[#F1F6F2]">
+          <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#233125] text-[#788B4E] dark:text-[#9BC358] flex items-center justify-center text-sm shadow-2xs">
+            <Sparkles size={16} />
           </div>
-        )}
+          <div>
+            <p className="font-bold text-xs text-[#2D5A43]">
+              +{xpToast.amount} XP DIDAPATKAN
+            </p>
+            <p className="text-xs text-[#282D29] font-medium mt-0.5">
+              {xpToast.message}
+            </p>
+          </div>
+        </div>
+      )}
 
-        {/* Global Add Application Modal */}
-        <ApplicationModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSuccess={() => {
-            triggerXpCelebration(10, "Lamaran baru berhasil ditambahkan! +10 XP");
-            router.refresh();
-          }}
-        />
+      {/* Global Add Application Modal */}
+      <ApplicationModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => {
+          triggerXpCelebration(10, "Lamaran baru berhasil ditambahkan! +10 XP");
+          triggerRefresh();
+          refreshProfile();
+          router.refresh();
+        }}
+      />
 
-        {/* Authentication Modal */}
-        <Modal
-          isOpen={isAuthModalOpen && !isLoadingAuth}
-          onClose={() => {
-            if (user) setIsAuthModalOpen(false);
-          }}
-          title={
-            authMode === "login"
-              ? "Masuk ke ApplyBloom"
-              : "Daftar Akun Baru ApplyBloom"
-          }
-          subtitle="Kelola lamaran pekerjaan dan pantau progres karirmu"
-          maxWidth="md"
-        >
-          <div className="space-y-4">
-            {/* Quick Demo Access Button - Strawberry Creme Accent */}
-            <div className="p-3.5 rounded-2xl bg-[#FDF2F4] border border-[#F6D2D8] text-center">
-              <p className="text-xs text-[#B83E51] font-semibold mb-2">
-                Ingin langsung mencoba tanpa registrasi?
-              </p>
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                className="w-full font-bold flex items-center justify-center gap-2"
-                onClick={handleQuickDemoLogin}
-                isLoading={isSubmittingAuth}
-              >
-                <Zap size={14} className="text-amber-300" />
-                <span>Masuk Instan sebagai Demo User</span>
-              </Button>
+      {/* Authentication Modal */}
+      <Modal
+        isOpen={isAuthModalOpen && !isLoadingAuth}
+        onClose={() => {
+          if (user) setIsAuthModalOpen(false);
+        }}
+        title={
+          authMode === "login"
+            ? "Masuk ke ApplyBloom"
+            : "Daftar Akun Baru ApplyBloom"
+        }
+        subtitle="Kelola lamaran pekerjaan dan pantau progres karirmu"
+        maxWidth="md"
+      >
+        <div className="space-y-4">
+          {/* Quick Demo Access Button - Strawberry Creme Accent */}
+          <div className="p-3.5 rounded-2xl bg-[#FDF2F4] border border-[#F6D2D8] text-center">
+            <p className="text-xs text-[#B83E51] font-semibold mb-2">
+              Ingin langsung mencoba tanpa registrasi?
+            </p>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="w-full font-bold flex items-center justify-center gap-2"
+              onClick={handleQuickDemoLogin}
+              isLoading={isSubmittingAuth}
+            >
+              <Zap size={14} className="text-amber-300" />
+              <span>Masuk Instan sebagai Demo User</span>
+            </Button>
+          </div>
+
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-[#E8E1D5]"></div>
+            <span className="shrink mx-3 text-[11px] text-[#8D9B91] uppercase font-semibold">
+              atau gunakan akun sendiri
+            </span>
+            <div className="flex-grow border-t border-[#E8E1D5]"></div>
+          </div>
+
+          {authError && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              {authError}
             </div>
+          )}
 
-            <div className="relative flex py-1 items-center">
-              <div className="flex-grow border-t border-[#E8E1D5]"></div>
-              <span className="shrink mx-3 text-[11px] text-[#8D9B91] uppercase font-semibold">
-                atau gunakan akun sendiri
-              </span>
-              <div className="flex-grow border-t border-[#E8E1D5]"></div>
-            </div>
-
-            {authError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                {authError}
+          <form onSubmit={handleAuthSubmit} className="space-y-3.5">
+            {authMode === "register" && (
+              <div>
+                <label className="block text-xs font-semibold text-[#282D29] mb-1">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Budi Santoso"
+                  value={authName}
+                  onChange={(e) => setAuthName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
+                />
               </div>
             )}
 
-            <form onSubmit={handleAuthSubmit} className="space-y-3.5">
-              {authMode === "register" && (
-                <div>
-                  <label className="block text-xs font-semibold text-[#282D29] mb-1">
-                    Nama Lengkap
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Contoh: Budi Santoso"
-                    value={authName}
-                    onChange={(e) => setAuthName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-semibold text-[#282D29] mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="kamu@email.com"
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#282D29] mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-full mt-2"
-                isLoading={isSubmittingAuth}
-              >
-                {authMode === "login" ? "Masuk Sekarang" : "Daftar Akun"}
-              </Button>
-            </form>
-
-            <div className="text-center pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode(authMode === "login" ? "register" : "login");
-                  setAuthError(null);
-                }}
-                className="text-xs text-[#2D5A43] hover:underline font-semibold cursor-pointer"
-              >
-                {authMode === "login"
-                  ? "Belum punya akun? Daftar di sini"
-                  : "Sudah punya akun? Masuk di sini"}
-              </button>
+            <div>
+              <label className="block text-xs font-semibold text-[#282D29] mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                placeholder="kamu@email.com"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
+              />
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#282D29] mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={authPassword}
+                onChange={(e) => setAuthPassword(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full mt-2"
+              isLoading={isSubmittingAuth}
+            >
+              {authMode === "login" ? "Masuk Sekarang" : "Daftar Akun"}
+            </Button>
+          </form>
+
+          <div className="text-center pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode(authMode === "login" ? "register" : "login");
+                setAuthError(null);
+              }}
+              className="text-xs text-[#2D5A43] hover:underline font-semibold cursor-pointer"
+            >
+              {authMode === "login"
+                ? "Belum punya akun? Daftar di sini"
+                : "Sudah punya akun? Masuk di sini"}
+            </button>
           </div>
-        </Modal>
-      </div>
+        </div>
+      </Modal>
     </AppContext.Provider>
+  );
+}
+
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  const { user, profile, isLoadingAuth, openAddModal, handleLogout } = useApp();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+
+  const getSkeletonType = () => {
+    if (pathname === "/") return "dashboard";
+    if (pathname.startsWith("/pipeline")) return "pipeline";
+    if (pathname.startsWith("/applications")) return "applications";
+    if (pathname.startsWith("/garden")) return "garden";
+    return "generic";
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F4F7EF] dark:bg-[#0C100D] text-[#242D22] dark:text-[#F1F6F2] flex flex-col transition-colors duration-200">
+      {/* Sidebar (Desktop) */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        profile={profile}
+        onAddApplication={openAddModal}
+      />
+
+      {/* Main Content Area */}
+      <div className="lg:pl-64 flex-1 flex flex-col min-w-0">
+        <Navbar
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          user={user}
+          profile={profile}
+          onAddApplication={openAddModal}
+          onLogout={handleLogout}
+        />
+
+        <main className="flex-1 p-3 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
+          <div className="bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] rounded-3xl sm:rounded-[2.2rem] shadow-xs p-4 sm:p-7 min-h-[calc(100vh-6.5rem)] transition-colors duration-200">
+            {isLoadingAuth ? (
+              <WireframeSkeleton type={getSkeletonType()} />
+            ) : (
+              children
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Curved Bottom Navigation Bar with Scooped Floating Active Circle */}
+      <BottomNavbar />
+    </div>
   );
 }

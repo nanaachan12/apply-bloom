@@ -24,12 +24,19 @@ import { PlantVisual } from "@/components/garden/PlantVisual";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/Badge";
 import { ReminderModal } from "@/components/reminders/ReminderModal";
+import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { DashboardSummaryDto, ApplicationDto, ReminderDto } from "@/types";
 import { apiFetch } from "@/lib/api";
 
 export default function DashboardPage() {
-  const { user, profile, refreshProfile, openAddModal, triggerXpCelebration } =
-    useApp();
+  const {
+    user,
+    profile,
+    refreshProfile,
+    openAddModal,
+    triggerXpCelebration,
+    refreshTimestamp,
+  } = useApp();
   const [summary, setSummary] = useState<DashboardSummaryDto | null>(null);
   const [applications, setApplications] = useState<ApplicationDto[]>([]);
   const [recentEvents, setRecentEvents] = useState<any[]>([]);
@@ -75,7 +82,7 @@ export default function DashboardPage() {
     if (user) {
       fetchDashboardData();
     }
-  }, [user]);
+  }, [user, refreshTimestamp]);
 
   const handleToggleReminder = async (id: string, isCompleted: boolean) => {
     try {
@@ -98,9 +105,12 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Welcome Banner - Olive Sage & Strawberry Pink */}
-        <div className="relative overflow-hidden p-5 sm:p-7 rounded-3xl bg-linear-to-r from-[#EEF3E2] via-[#F4F8EB] to-[#FFF0F3] dark:from-[#19221B] dark:via-[#161D17] dark:to-[#26151D] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-2xs transition-colors duration-200">
+      {isLoading ? (
+        <WireframeSkeleton type="dashboard" />
+      ) : (
+        <div className="space-y-6">
+          {/* Welcome Banner - Olive Sage & Strawberry Pink */}
+          <div className="relative overflow-hidden p-5 sm:p-7 rounded-3xl bg-linear-to-r from-[#EEF3E2] via-[#F4F8EB] to-[#FFF0F3] dark:from-[#19221B] dark:via-[#161D17] dark:to-[#26151D] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-2xs transition-colors duration-200">
           <div className="relative z-10 max-w-xl">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-[#233125] text-[#556832] dark:text-[#A8D063] border border-[#D5E0BF] dark:border-[#354837] mb-2.5 shadow-2xs">
               <Sparkles size={12} className="text-[#788B4E] dark:text-[#9BC358]" />
@@ -467,6 +477,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+    )}
 
       {/* Reminder Modal */}
       <ReminderModal

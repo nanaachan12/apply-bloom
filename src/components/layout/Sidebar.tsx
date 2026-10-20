@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -11,9 +11,7 @@ import {
   Flower2,
   Settings,
   X,
-  Sparkles,
   Flame,
-  Plus,
 } from "lucide-react";
 import { GamificationProfileDto } from "@/types";
 import { useApp } from "@/components/layout/AppLayout";
@@ -29,7 +27,6 @@ export function Sidebar({
   isOpen,
   onClose,
   profile,
-  onAddApplication,
 }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useApp();
@@ -43,6 +40,57 @@ export function Sidebar({
     { label: "Settings", href: "/settings", icon: Settings },
   ];
 
+  // Active path state for immediate optimistic transition
+  const [activePath, setActivePath] = useState(pathname);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setActivePath(pathname);
+  }, [pathname]);
+
+  const activeIndex = navItems.findIndex((item) =>
+    item.href === "/" ? activePath === "/" : activePath.startsWith(item.href)
+  );
+
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    top: 0,
+    height: 48,
+    opacity: 0,
+  });
+
+  const updateIndicator = () => {
+    if (activeIndex >= 0) {
+      const el = itemRefs.current[activeIndex];
+      if (el && el.offsetHeight > 0) {
+        setIndicatorStyle({
+          top: el.offsetTop,
+          height: el.offsetHeight,
+          opacity: 1,
+        });
+        return;
+      }
+      // Reliable fallback if DOM ref not yet measured
+      setIndicatorStyle({
+        top: activeIndex * 54,
+        height: 48,
+        opacity: 1,
+      });
+    } else {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
+    }
+  };
+
+  useEffect(() => {
+    updateIndicator();
+    const timer = setTimeout(() => setIsMounted(true), 30);
+    window.addEventListener("resize", updateIndicator);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateIndicator);
+    };
+  }, [activePath, activeIndex]);
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -53,15 +101,15 @@ export function Sidebar({
         />
       )}
 
-      {/* Sidebar Container - Olive Sage in Light Mode, Tactical Gunmetal in Dark Mode */}
+      {/* Sidebar Container - No vertical border line for seamless merge */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-[#7B8E50] dark:bg-[#131A14] border-r border-[#6F8146] dark:border-[#232E25] text-white flex flex-col justify-between p-5 transition-all duration-200 lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-[#7B8E50] dark:bg-[#131A14] text-white flex flex-col justify-between pt-5 pb-5 pl-5 pr-0 transition-transform duration-200 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div>
-          {/* Header Profile Card (Matching User Reference Image) */}
-          <div className="flex items-center justify-between pb-5 mb-3 border-b border-white/20 dark:border-[#232E25]">
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Header Profile Card */}
+          <div className="flex items-center justify-between pb-5 mb-3 pr-5 border-b border-white/20 dark:border-[#232E25]">
             <Link
               href="/settings"
               className="flex items-center gap-3 group min-w-0"
@@ -82,7 +130,7 @@ export function Sidebar({
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 lg:hidden"
+              className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 lg:hidden cursor-pointer"
               aria-label="Tutup Menu"
             >
               <X size={18} />
@@ -90,39 +138,79 @@ export function Sidebar({
           </div>
 
           {/* Section Menu Label */}
-          <p className="text-[11px] font-bold text-white/70 dark:text-[#8E9F90] uppercase tracking-wider px-3 my-2">
+          <p className="text-[11px] font-bold text-white/70 dark:text-[#8E9F90] uppercase tracking-wider px-3 my-2 pr-5">
             Menu
           </p>
 
-          {/* Nav Items - Floating White Pill on Active */}
-          <nav className="space-y-1.5">
-            {navItems.map((item) => {
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
+          {/* Nav Items Container with Smooth Animated Merged Tab Indicator */}
+          <nav className="relative flex flex-col gap-1.5">
+            {/* Smooth Sliding Merged Tab Background Indicator */}
+            <div
+              aria-hidden="true"
+              className={`absolute top-0 left-0 -right-[2px] pointer-events-none z-0 ${
+                isMounted
+                  ? "transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] opacity-100"
+                  : "opacity-0"
+              }`}
+              style={{
+                transform: `translateY(${indicatorStyle.top}px)`,
+                height: `${indicatorStyle.height}px`,
+                opacity: indicatorStyle.opacity,
+              }}
+            >
+              {/* Top Concave Curve (Smoothly merges into right canvas) */}
+              <svg
+                aria-hidden="true"
+                className="absolute -top-4 right-0 w-4 h-4 text-[#F4F7EF] dark:text-[#0C100D] fill-current pointer-events-none z-20"
+                viewBox="0 0 16 16"
+              >
+                <path d="M 16 0 C 16 8.837 8.837 16 0 16 L 16 16 Z" />
+              </svg>
+
+              {/* Active Tab Merged Body - seamless with canvas */}
+              <div className="w-full h-full rounded-l-3xl bg-[#F4F7EF] dark:bg-[#0C100D] shadow-[-4px_0_12px_rgba(0,0,0,0.03)]" />
+
+              {/* Bottom Concave Curve (Smoothly merges into right canvas) */}
+              <svg
+                aria-hidden="true"
+                className="absolute -bottom-4 right-0 w-4 h-4 text-[#F4F7EF] dark:text-[#0C100D] fill-current pointer-events-none z-20"
+                viewBox="0 0 16 16"
+              >
+                <path d="M 0 0 C 8.837 0 16 7.163 16 16 L 16 0 Z" />
+              </svg>
+            </div>
+
+            {/* Nav Items Link List - Direct children of nav so offsetTop is accurate */}
+            {navItems.map((item, index) => {
+              const isActive = index === activeIndex;
               const Icon = item.icon;
 
               return (
                 <Link
                   key={item.href}
+                  ref={(el) => {
+                    itemRefs.current[index] = el;
+                  }}
                   href={item.href}
-                  onClick={onClose}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-medium transition-all duration-150 ${
+                  onClick={() => {
+                    setActivePath(item.href);
+                    onClose();
+                  }}
+                  className={`group flex items-center gap-3 pl-4 h-12 text-sm font-semibold transition-colors duration-200 cursor-pointer relative z-10 ${
                     isActive
-                      ? "bg-white dark:bg-[#233125] text-[#63733E] dark:text-[#A8D063] font-bold shadow-sm dark:border dark:border-[#354837]"
-                      : "text-white/85 dark:text-[#8E9F90] hover:text-white dark:hover:text-[#F1F6F2] hover:bg-white/10 dark:hover:bg-[#1E281F]"
+                      ? "text-[#4E612B] dark:text-[#9BC358] font-bold rounded-l-3xl pr-5"
+                      : "text-white/85 dark:text-[#8E9F90] hover:text-white dark:hover:text-[#F1F6F2] hover:bg-white/10 dark:hover:bg-[#1E281F]/60 mr-4 rounded-2xl pr-4"
                   }`}
                 >
                   <Icon
-                    size={18}
-                    className={
+                    size={19}
+                    className={`shrink-0 transition-transform duration-200 ${
                       isActive
-                        ? "text-[#63733E] dark:text-[#A8D063]"
-                        : "text-white/80 dark:text-[#8E9F90]"
-                    }
+                        ? "text-[#4E612B] dark:text-[#9BC358] scale-105"
+                        : "text-white/80 dark:text-[#8E9F90] group-hover:text-white group-hover:scale-105"
+                    }`}
                   />
-                  <span>{item.label}</span>
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
@@ -130,7 +218,7 @@ export function Sidebar({
         </div>
 
         {/* Bottom Garden Plant Status Card */}
-        <div className="space-y-3 pt-3">
+        <div className="pr-5 pt-3">
           <div className="p-3.5 rounded-2xl bg-black/15 dark:bg-[#1A221C] border border-white/20 dark:border-[#28352A] backdrop-blur-xs">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
@@ -168,17 +256,6 @@ export function Sidebar({
               </Link>
             </div>
           </div>
-
-          <button
-            onClick={() => {
-              onClose();
-              onAddApplication();
-            }}
-            className="w-full py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold bg-white dark:bg-[#233125] hover:bg-[#F2F5EB] dark:hover:bg-[#2A3B2D] text-[#63733E] dark:text-[#A8D063] shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-          >
-            <Plus size={15} />
-            <span>Tambah Lamaran</span>
-          </button>
         </div>
       </aside>
     </>

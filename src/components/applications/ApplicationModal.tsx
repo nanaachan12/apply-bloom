@@ -11,11 +11,14 @@ import {
 } from "@/lib/constants";
 import { ApplicationDto } from "@/types";
 
+import { apiFetch } from "@/lib/api";
+
 interface ApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (data: any) => void;
   initialData?: ApplicationDto | null;
+  defaultStatus?: ApplicationStatusType;
 }
 
 export function ApplicationModal({
@@ -23,6 +26,7 @@ export function ApplicationModal({
   onClose,
   onSuccess,
   initialData,
+  defaultStatus = "APPLIED",
 }: ApplicationModalProps) {
   const isEditing = Boolean(initialData);
 
@@ -37,7 +41,7 @@ export function ApplicationModal({
   const [currency, setCurrency] = useState("IDR");
   const [source, setSource] = useState("");
   const [jobUrl, setJobUrl] = useState("");
-  const [status, setStatus] = useState<ApplicationStatusType>("APPLIED");
+  const [status, setStatus] = useState<ApplicationStatusType>(defaultStatus);
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,11 +69,11 @@ export function ApplicationModal({
       setCurrency("IDR");
       setSource("LinkedIn");
       setJobUrl("");
-      setStatus("APPLIED");
+      setStatus(defaultStatus || "APPLIED");
       setNotes("");
     }
     setError(null);
-  }, [initialData, isOpen]);
+  }, [initialData, defaultStatus, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,16 +85,24 @@ export function ApplicationModal({
     setIsLoading(true);
     setError(null);
 
+    let formattedJobUrl = jobUrl.trim();
+    if (formattedJobUrl && !/^https?:\/\//i.test(formattedJobUrl)) {
+      formattedJobUrl = `https://${formattedJobUrl}`;
+    }
+
+    const parsedMin = salaryMin.trim() && !isNaN(Number(salaryMin)) ? Number(salaryMin) : null;
+    const parsedMax = salaryMax.trim() && !isNaN(Number(salaryMax)) ? Number(salaryMax) : null;
+
     const payload = {
       company: company.trim(),
       position: position.trim(),
       location: location.trim() || null,
       employmentType: employmentType || null,
-      salaryMin: salaryMin ? Number(salaryMin) : null,
-      salaryMax: salaryMax ? Number(salaryMax) : null,
+      salaryMin: parsedMin,
+      salaryMax: parsedMax,
       currency,
       source: source.trim() || null,
-      jobUrl: jobUrl.trim() || null,
+      jobUrl: formattedJobUrl || null,
       status,
       notes: notes.trim() || null,
     };
@@ -101,7 +113,7 @@ export function ApplicationModal({
         : "/api/v1/applications";
       const method = isEditing ? "PATCH" : "POST";
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -36,7 +36,7 @@ export const createApplicationSchema = z.object({
   salaryMax: z.number().min(0).optional().nullable(),
   currency: z.string().default("IDR"),
   source: z.string().max(100).optional().nullable(),
-  jobUrl: z.string().url("URL tidak valid").optional().nullable().or(z.literal("")),
+  jobUrl: z.string().max(500, "URL maksimal 500 karakter").optional().nullable().or(z.literal("")),
   status: z
     .enum([
       APPLICATION_STATUS.WISHLIST,

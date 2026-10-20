@@ -7,13 +7,14 @@ import { PipelineBoard } from "@/components/applications/PipelineBoard";
 import { ApplicationDetailDrawer } from "@/components/applications/ApplicationDetailDrawer";
 import { ApplicationModal } from "@/components/applications/ApplicationModal";
 import { ReminderModal } from "@/components/reminders/ReminderModal";
+import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { Button } from "@/components/ui/Button";
 import { ApplicationDto } from "@/types";
 import { ApplicationStatusType } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
 
 export default function PipelinePage() {
-  const { user, openAddModal, triggerXpCelebration } = useApp();
+  const { user, openAddModal, triggerXpCelebration, refreshTimestamp } = useApp();
   const [applications, setApplications] = useState<ApplicationDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,6 +27,7 @@ export default function PipelinePage() {
     undefined
   );
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [addCardStatus, setAddCardStatus] = useState<ApplicationStatusType | null>(null);
 
   const fetchApplications = async () => {
     if (!user) return;
@@ -47,7 +49,7 @@ export default function PipelinePage() {
     if (user) {
       fetchApplications();
     }
-  }, [user]);
+  }, [user, refreshTimestamp]);
 
   const handleMoveStatus = async (
     appId: string,
@@ -121,36 +123,41 @@ export default function PipelinePage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading flex items-center gap-2">
-              <KanbanSquare size={22} className="text-[#788B4E] dark:text-[#9BC358]" />
-              <span>Pipeline Board</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-[#616D64] dark:text-[#A0B2A3] mt-0.5">
-              Pantau seluruh tahapan rekrutmen secara visual dan pindahkan lamaran
-              seiring berjalannya proses.
-            </p>
+      {isLoading ? (
+        <WireframeSkeleton type="pipeline" />
+      ) : (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading flex items-center gap-2">
+                <KanbanSquare size={22} className="text-[#788B4E] dark:text-[#9BC358]" />
+                <span>Pipeline Board</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-[#616D64] dark:text-[#A0B2A3] mt-0.5">
+                Pantau seluruh tahapan rekrutmen secara visual dan pindahkan lamaran
+                seiring berjalannya proses.
+              </p>
+            </div>
+
+            <Button variant="primary" onClick={openAddModal}>
+              <Plus size={15} />
+              <span>Tambah Lamaran</span>
+            </Button>
           </div>
 
-          <Button variant="primary" onClick={openAddModal}>
-            <Plus size={15} />
-            <span>Tambah Lamaran</span>
-          </Button>
+          {/* Board View */}
+          <PipelineBoard
+            applications={applications}
+            onSelectApplication={(app) => {
+              setSelectedApp(app);
+              setIsDrawerOpen(true);
+            }}
+            onMoveStatus={handleMoveStatus}
+            onAddCard={(status) => setAddCardStatus(status)}
+          />
         </div>
-
-        {/* Board View */}
-        <PipelineBoard
-          applications={applications}
-          onSelectApplication={(app) => {
-            setSelectedApp(app);
-            setIsDrawerOpen(true);
-          }}
-          onMoveStatus={handleMoveStatus}
-        />
-      </div>
+      )}
 
       {/* Detail Drawer */}
       <ApplicationDetailDrawer
@@ -181,6 +188,17 @@ export default function PipelinePage() {
         }}
         onSuccess={() => {
           fetchApplications();
+        }}
+      />
+
+      {/* Stage Specific Add Card Modal */}
+      <ApplicationModal
+        isOpen={Boolean(addCardStatus)}
+        defaultStatus={addCardStatus || "WISHLIST"}
+        onClose={() => setAddCardStatus(null)}
+        onSuccess={() => {
+          fetchApplications();
+          triggerXpCelebration(10, "Lamaran baru berhasil ditambahkan! +10 XP");
         }}
       />
 
