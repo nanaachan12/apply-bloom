@@ -11,7 +11,7 @@ export function isNightSleepTime(): boolean {
 }
 
 interface BloomieMascotProps {
-  mood?: "auto" | "happy" | "sleep" | "celebrate" | "surprised";
+  mood?: "auto" | "happy" | "sleep" | "celebrate" | "surprised" | "smile";
   size?: "sm" | "md" | "lg" | "xl";
   interactive?: boolean;
   className?: string;
@@ -22,6 +22,8 @@ interface BloomieMascotProps {
   bubblePlacement?: "top" | "left" | "bottom";
   showBubble?: boolean;
   speechList?: string[];
+  isSmiling?: boolean;
+  isSquinting?: boolean;
 }
 
 const MENU_MESSAGES: Record<string, string[]> = {
@@ -75,12 +77,15 @@ export function BloomieMascot({
   bubblePlacement = "top",
   showBubble = true,
   speechList,
+  isSmiling = false,
+  isSquinting = false,
 }: BloomieMascotProps) {
   const pathname = usePathname() || "/";
   const [bubbleText, setBubbleText] = useState<string | null>(speechText || null);
   const [isBlinking, setIsBlinking] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPokedSquint, setIsPokedSquint] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,8 +102,9 @@ export function BloomieMascot({
     return () => clearInterval(timer);
   }, []);
 
+  const isSquintingActive = isPokedSquint || isSquinting || isSmiling || mood === "smile" || mood === "celebrate";
   const isNightTime = currentHour >= 22 || currentHour < 5;
-  const isSleeping = mood === "sleep" || (mood === "auto" && isNightTime);
+  const isSleeping = !isSquintingActive && (mood === "sleep" || (mood === "auto" && isNightTime));
   const isSurprised = mood === "surprised";
 
   // Helper to determine menu key from current path
@@ -176,7 +182,7 @@ export function BloomieMascot({
   }, [enableEyeTracking, isSleeping]);
 
   // Gentle Web Audio Synthesizer
-  const playSound = (type: "poke" | "sleep") => {
+  const playSound = (type: "poke" | "sleep" | "smile") => {
     try {
       const AudioCtx =
         window.AudioContext ||
@@ -200,6 +206,25 @@ export function BloomieMascot({
         return;
       }
 
+      if (type === "smile") {
+        // Cheerful sweet melodic chime (D5, F#5, A5, D6)
+        const notes = [587.33, 739.99, 880.0, 1174.66];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = "sine";
+          const startTime = now + idx * 0.08;
+          osc.frequency.setValueAtTime(freq, startTime);
+          gain.gain.setValueAtTime(0.08, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.22);
+          osc.start(startTime);
+          osc.stop(startTime + 0.22);
+        });
+        return;
+      }
+
       // Melodic gentle chime
       const notes = [523.25, 659.25, 783.99];
       notes.forEach((freq, idx) => {
@@ -220,9 +245,20 @@ export function BloomieMascot({
     }
   };
 
+  // Play sound & bounce when smiling effect activates
+  useEffect(() => {
+    if (isSquintingActive && (isSmiling || mood === "smile")) {
+      playSound("smile");
+      setIsJumping(true);
+      const timer = setTimeout(() => setIsJumping(false), 900);
+      return () => clearTimeout(timer);
+    }
+  }, [isSquintingActive, isSmiling, mood]);
+
   const handlePoke = () => {
     if (!interactive) return;
 
+    setIsPokedSquint(true);
     setIsJumping(true);
     playSound(isSleeping ? "sleep" : "poke");
 
@@ -245,7 +281,10 @@ export function BloomieMascot({
       setBubbleText(msgs[nextIdx]);
     }
 
-    setTimeout(() => setIsJumping(false), 450);
+    setTimeout(() => {
+      setIsJumping(false);
+      setIsPokedSquint(false);
+    }, 700);
   };
 
   const sizeClasses = {
@@ -262,18 +301,18 @@ export function BloomieMascot({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Contextual Speech Bubble (No emojis, no action chips, clean design) */}
+      {/* Contextual Speech Bubble - Layer Depan Sendiri (z-[70]) */}
       {showBubble && interactive && bubbleText && (
         <div
-          className={`absolute z-40 max-w-[240px] sm:max-w-[280px] w-max animate-in fade-in zoom-in-95 duration-200 ${
+          className={`absolute z-[70] max-w-[260px] sm:max-w-[310px] w-max animate-in fade-in zoom-in-95 duration-200 pointer-events-auto ${
             bubblePlacement === "left"
               ? "sm:right-full sm:mr-4 sm:top-7 sm:translate-y-0 sm:left-auto sm:translate-x-0 -top-20 left-1/2 -translate-x-1/2"
               : bubblePlacement === "bottom"
               ? "top-full mt-2 left-1/2 -translate-x-1/2"
-              : "bottom-full mb-3 left-1/2 -translate-x-1/2"
+              : "bottom-full mb-3.5 left-1/2 -translate-x-1/2"
           }`}
         >
-          <div className="relative bg-white/95 dark:bg-[#1B231C]/95 backdrop-blur-md text-[#242D22] dark:text-[#F1F6F2] text-xs font-medium px-3.5 py-2.5 rounded-2xl shadow-xl border border-[#DEE7D0] dark:border-[#2C3B2E] flex items-start gap-2 leading-relaxed">
+          <div className="relative bg-white/98 dark:bg-[#1B231C]/98 backdrop-blur-md text-[#242D22] dark:text-[#F1F6F2] text-xs font-medium px-4 py-3 rounded-2xl shadow-xl border border-[#DEE7D0] dark:border-[#2C3B2E] flex items-start gap-2.5 leading-relaxed">
             <span className="flex-1 text-[11px] sm:text-xs">{bubbleText}</span>
             <button
               onClick={(e) => {
@@ -323,7 +362,9 @@ export function BloomieMascot({
         className={`relative ${sizeClasses[size]} transition-transform duration-200 ${
           interactive ? "cursor-pointer" : ""
         } ${
-          isSurprised
+          isSquintingActive
+            ? "-translate-y-2.5 scale-110"
+            : isSurprised
             ? "scale-x-92 scale-y-108 -translate-y-1.5"
             : isJumping
             ? "-translate-y-3 scale-x-92 scale-y-108"
@@ -428,17 +469,23 @@ export function BloomieMascot({
           <ellipse
             cx="34"
             cy="84"
-            rx={isSurprised ? 9 : isHovered ? 8 : 6}
-            ry={isSurprised ? 6 : isHovered ? 5 : 4}
+            rx={isSquintingActive ? 10 : isSurprised ? 9 : isHovered ? 8 : 6}
+            ry={isSquintingActive ? 7 : isSurprised ? 6 : isHovered ? 5 : 4}
             fill="url(#bloomieBlush)"
           />
           <ellipse
             cx="86"
             cy="84"
-            rx={isSurprised ? 9 : isHovered ? 8 : 6}
-            ry={isSurprised ? 6 : isHovered ? 5 : 4}
+            rx={isSquintingActive ? 10 : isSurprised ? 9 : isHovered ? 8 : 6}
+            ry={isSquintingActive ? 7 : isSurprised ? 6 : isHovered ? 5 : 4}
             fill="url(#bloomieBlush)"
           />
+          {isSquintingActive && (
+            <g>
+              <circle cx="33" cy="83" r="1.5" fill="#FFFFFF" opacity="0.95" />
+              <circle cx="87" cy="83" r="1.5" fill="#FFFFFF" opacity="0.95" />
+            </g>
+          )}
 
           {/* EYES */}
           {isSurprised ? (
@@ -459,6 +506,15 @@ export function BloomieMascot({
                 opacity="0.9"
               />
             </g>
+          ) : isSquintingActive ? (
+            // Joyful Happy Squinting Eyes (⌒ ⌒ when poked/pressed/watered!)
+            <g stroke="#1F2E1E" strokeWidth="3.4" strokeLinecap="round" fill="none">
+              <path d="M36,75 Q44,63 52,75" />
+              <path d="M68,75 Q76,63 84,75" />
+              {/* Sweet smile crease accents */}
+              <path d="M35,76 L33,78" strokeWidth="2" />
+              <path d="M85,76 L87,78" strokeWidth="2" />
+            </g>
           ) : !isSleeping ? (
             isBlinking ? (
               // Blinking Eyes
@@ -466,14 +522,8 @@ export function BloomieMascot({
                 <path d="M38,72 Q44,76 50,72" />
                 <path d="M70,72 Q76,76 82,72" />
               </g>
-            ) : isJumping || isHovered ? (
-              // Happy Arc Eyes
-              <g stroke="#1F2E1E" strokeWidth="3.2" strokeLinecap="round" fill="none">
-                <path d="M38,74 Q44,66 50,74" />
-                <path d="M70,74 Q76,66 82,74" />
-              </g>
             ) : (
-              // Normal Alive Eyes with Eye-Tracking Pupil
+              // Alive Visible Eyes with Eye-Tracking Pupil (Default: eyes clearly visible!)
               <g>
                 <ellipse cx="44" cy="72" rx="7" ry="9" fill="#1C2B1D" />
                 <circle
@@ -519,29 +569,28 @@ export function BloomieMascot({
               <ellipse cx="60" cy="87" rx="4.5" ry="6" fill="#1C2B1D" />
               <ellipse cx="60" cy="88" rx="2.5" ry="3.5" fill="#F45B88" />
             </g>
-          ) : !isSleeping ? (
-            isJumping || isHovered ? (
-              // Joyful Open Smile
-              <g>
-                <path
-                  d="M52,84 Q60,95 68,84 Z"
-                  fill="#1C2B1D"
-                />
-                <path
-                  d="M55,87 Q60,94 65,87 Z"
-                  fill="#F45B88"
-                />
-              </g>
-            ) : (
-              // Gentle Cheerful Smile
+          ) : isSquintingActive || isJumping || isHovered ? (
+            // Joyful Open Smile with Pink Tongue & Sparkle
+            <g>
               <path
-                d="M54,84 Q60,90 66,84"
-                stroke="#1C2B1D"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                fill="none"
+                d="M50,83 Q60,96 70,83 Z"
+                fill="#1C2B1D"
               />
-            )
+              <path
+                d="M53,86 Q60,95 67,86 Z"
+                fill="#F45B88"
+              />
+              <ellipse cx="60" cy="85" rx="3" ry="1.2" fill="#FFFFFF" opacity="0.8" />
+            </g>
+          ) : !isSleeping ? (
+            // Cheerful Smile by default (always smiling and cute!)
+            <path
+              d="M52,83 Q60,91 68,83"
+              stroke="#1C2B1D"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              fill="none"
+            />
           ) : (
             // Sleeping tiny mouth
             <path

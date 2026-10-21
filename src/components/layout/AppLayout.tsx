@@ -31,6 +31,9 @@ export interface AppContextType {
   isLoadingAuth: boolean;
   theme: "light" | "dark";
   toggleTheme: () => void;
+  showBloomie: boolean;
+  setShowBloomie: (show: boolean) => void;
+  toggleBloomie: () => void;
   refreshProfile: () => Promise<void>;
   openAddModal: () => void;
   triggerXpCelebration: (amount: number, reason?: string) => void;
@@ -45,6 +48,9 @@ export const AppContext = createContext<AppContextType>({
   isLoadingAuth: true,
   theme: "light",
   toggleTheme: () => {},
+  showBloomie: true,
+  setShowBloomie: () => {},
+  toggleBloomie: () => {},
   refreshProfile: async () => {},
   openAddModal: () => {},
   triggerXpCelebration: () => {},
@@ -62,6 +68,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [showBloomie, setShowBloomieState] = useState<boolean>(true);
   const [refreshTimestamp, setRefreshTimestamp] = useState<number>(Date.now());
 
   // Auth modal state for non-logged in visitors
@@ -93,6 +100,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    // Check saved bloomie visibility preference
+    try {
+      const savedBloomie = localStorage.getItem("applybloom_hide_bloomie");
+      if (savedBloomie === "true") {
+        setShowBloomieState(false);
+      }
+    } catch {
+      // LocalStorage fallback
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -104,6 +121,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.remove("dark");
     }
+  };
+
+  const setShowBloomie = (show: boolean) => {
+    setShowBloomieState(show);
+    try {
+      localStorage.setItem("applybloom_hide_bloomie", String(!show));
+    } catch {
+      // LocalStorage fallback
+    }
+  };
+
+  const toggleBloomie = () => {
+    setShowBloomieState((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("applybloom_hide_bloomie", String(!next));
+      } catch {
+        // LocalStorage fallback
+      }
+      return next;
+    });
   };
 
   const fetchAuthUser = async () => {
@@ -319,6 +357,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isLoadingAuth,
         theme,
         toggleTheme,
+        showBloomie,
+        setShowBloomie,
+        toggleBloomie,
         refreshProfile,
         openAddModal: () => setIsAddModalOpen(true),
         triggerXpCelebration,
@@ -481,7 +522,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile, isLoadingAuth, openAddModal, handleLogout } = useApp();
+  const { user, profile, isLoadingAuth, openAddModal, handleLogout, showBloomie } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
@@ -530,7 +571,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <BottomNavbar />
 
       {/* Interactive Bloomie Mascot Floating Companion */}
-      {user && !isLoadingAuth && <BloomieFloatingCompanion />}
+      {user && !isLoadingAuth && showBloomie && <BloomieFloatingCompanion />}
     </div>
   );
 }

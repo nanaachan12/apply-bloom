@@ -35,6 +35,9 @@ export default function BloomGardenPage() {
   const [badges, setBadges] = useState<BadgeDto[]>(cachedBadges || []);
   const [xpHistory, setXpHistory] = useState<XpTransactionDto[]>(cachedHistory || []);
   const [isLoading, setIsLoading] = useState(!hasCache);
+  const [bloomieMood, setBloomieMood] = useState<"auto" | "happy" | "sleep" | "celebrate" | "surprised" | "smile">("auto");
+  const [isBloomieSmiling, setIsBloomieSmiling] = useState(false);
+  const [bloomieSpeech, setBloomieSpeech] = useState<string | null>(null);
 
   const fetchGardenData = async (showLoading = !hasCache) => {
     if (!user) return;
@@ -95,6 +98,24 @@ export default function BloomGardenPage() {
         alert(json.error || "Gagal menyiram tanaman");
         return false;
       }
+
+      // Trigger Bloomie smiling celebration effect
+      setIsBloomieSmiling(true);
+      setBloomieMood("smile");
+      const smileMessages = [
+        "Segar sekali! Terima kasih banyak sudah menyiram tanamanku hari ini! 🌱✨",
+        "Airnya sejuk! Tanamannya senang, Bloomie juga ikut tersenyum lebar! 💚",
+        "Yaaay! Tanaman kita makin subur! Terus konsisten melamar ya! 🌸",
+        "Makasih sudah disiram! Yuk rawat impian karirmu setiap hari! 🌿✨",
+      ];
+      const randomMsg = smileMessages[Math.floor(Math.random() * smileMessages.length)];
+      setBloomieSpeech(randomMsg);
+
+      setTimeout(() => {
+        setIsBloomieSmiling(false);
+        setBloomieMood("auto");
+        setBloomieSpeech(null);
+      }, 5500);
 
       triggerXpCelebration(5, json.message || "Tanaman berhasil disiram! +5 XP");
 
@@ -180,15 +201,20 @@ export default function BloomGardenPage() {
             {/* Bloomie Companion */}
             <div className="flex flex-col items-center justify-center p-3 text-center">
               <BloomieMascot
-                mood="auto"
+                mood={bloomieMood}
                 size="md"
+                isSmiling={isBloomieSmiling}
+                speechText={bloomieSpeech || undefined}
+                showBubble={true}
               />
               <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2] mt-2 flex items-center gap-1.5 justify-center">
                 <span>Bloomie</span>
                 <span className="text-xs">🌱</span>
               </h4>
               <p className="text-[11px] text-[#616D64] dark:text-[#A0B2A3] mt-0.5 leading-relaxed max-w-[200px]">
-                Ketuk Bloomie untuk sapaan, efek ceria, dan kata motivasi karir! ✨
+                {isBloomieSmiling
+                  ? "Bloomie tersenyum bahagia karena tanamannya sudah disiram! ✨"
+                  : "Ketuk Bloomie untuk sapaan, efek ceria, dan kata motivasi karir! ✨"}
               </p>
             </div>
           </div>

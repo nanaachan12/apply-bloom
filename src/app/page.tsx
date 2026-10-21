@@ -164,18 +164,30 @@ export default function DashboardPage() {
         <WireframeSkeleton type="dashboard" />
       ) : (
         <div className="space-y-6">
-          {/* Welcome Banner - Olive Sage & Strawberry Pink */}
-          <div className="relative p-5 sm:p-7 rounded-3xl bg-linear-to-r from-[#EEF3E2] via-[#F4F8EB] to-[#FFF0F3] dark:from-[#19221B] dark:via-[#161D17] dark:to-[#26151D] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-2xs transition-colors duration-200">
+          {/* Welcome Hero Banner with bekgrond.webp Background Illustration */}
+          <div className="relative p-6 sm:p-8 rounded-3xl sm:rounded-[2.2rem] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-2xs transition-colors duration-200">
+            {/* Masked Background Container - Keeps background strictly within rounded corners without clipping speech bubble */}
+            <div className="absolute inset-0 rounded-3xl sm:rounded-[2.2rem] overflow-hidden pointer-events-none">
+              <div
+                className="absolute inset-0 bg-cover bg-center sm:bg-right bg-no-repeat transition-all duration-300"
+                style={{
+                  backgroundImage: `url('/images/bekgrond.webp')`,
+                }}
+              />
+              {/* Gradient Overlays for High Legibility in Light & Dark Mode */}
+              <div className="absolute inset-0 bg-linear-to-r from-white/90 via-white/80 to-white/40 dark:from-[#111712]/95 dark:via-[#111712]/85 dark:to-[#1b251d]/65 backdrop-blur-[0.5px]" />
+            </div>
+
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
               <div className="max-w-xl">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-[#233125] text-[#556832] dark:text-[#A8D063] border border-[#D5E0BF] dark:border-[#354837] mb-2.5 shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 dark:bg-[#233125]/90 text-[#556832] dark:text-[#A8D063] border border-[#D5E0BF] dark:border-[#354837] mb-2.5 shadow-xs backdrop-blur-xs">
                   <Sparkles size={12} className="text-[#788B4E] dark:text-[#9BC358]" />
                   <span>Career & Application Tracker</span>
                 </span>
-                <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading drop-shadow-2xs">
                   Selamat datang, {user ? user.name : "Kandidat"}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#647363] dark:text-[#8E9F90] mt-1.5 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#4F5D4F] dark:text-[#A5B7A7] mt-1.5 leading-relaxed font-medium">
                   Pantau seluruh proses rekrutmen kerja dan bangun kebiasaan melamar yang terstruktur setiap hari.
                 </p>
 
@@ -188,6 +200,7 @@ export default function DashboardPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => setIsReminderModalOpen(true)}
+                    className="bg-white/80 dark:bg-[#1A221C]/80 backdrop-blur-xs"
                   >
                     <Clock size={14} />
                     <span>Jadwalkan Agenda</span>
@@ -195,8 +208,8 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Bloomie Welcome Mascot */}
-              <div className="flex flex-col items-center shrink-0 self-center sm:self-end sm:pr-4 pt-6 sm:pt-10 pb-1">
+              {/* Bloomie Welcome Mascot - Floating on Front Layer */}
+              <div className="relative z-30 flex flex-col items-center shrink-0 self-center sm:self-end sm:pr-4 pt-10 sm:pt-14 pb-1">
                 <BloomieMascot
                   mood="auto"
                   size="md"

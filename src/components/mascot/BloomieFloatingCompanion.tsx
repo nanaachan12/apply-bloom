@@ -4,6 +4,28 @@ import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { BloomieMascot } from "./BloomieMascot";
+import { useApp } from "@/components/layout/AppLayout";
+
+function EyeOffIcon({ size = 12, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+      <path d="m2 2 20 20" />
+    </svg>
+  );
+}
 
 const MENU_MESSAGES: Record<string, string[]> = {
   dashboard: [
@@ -46,6 +68,7 @@ const SLEEP_QUOTES = [
 
 export function BloomieFloatingCompanion() {
   const pathname = usePathname() || "/";
+  const { showBloomie, setShowBloomie, triggerXpCelebration } = useApp();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [speech, setSpeech] = useState<string | null>(null);
@@ -112,8 +135,8 @@ export function BloomieFloatingCompanion() {
     return () => window.removeEventListener("resize", handleResize);
   }, [mounted, side]);
 
-  // Hide floating Bloomie when on Bloom Garden page because Bloomie is already next to the plant
-  if (pathname.startsWith("/garden")) {
+  // Hide floating Bloomie when disabled via settings or on Bloom Garden page
+  if (!showBloomie || pathname.startsWith("/garden")) {
     return null;
   }
 
@@ -286,18 +309,37 @@ export function BloomieFloatingCompanion() {
             side === "left" ? "left-0" : "right-0"
           }`}
         >
-          <div className="relative bg-white/95 dark:bg-[#1B231C]/95 backdrop-blur-md text-[#242D22] dark:text-[#F1F6F2] text-xs font-medium px-4 py-3 rounded-2xl shadow-xl border border-[#DEE7D0] dark:border-[#2C3B2E] flex items-center gap-2.5 leading-relaxed">
-            <p className="text-[11px] sm:text-xs flex-1">{speech}</p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
-              }}
-              className="text-[#7A8E80] hover:text-[#242D22] dark:hover:text-[#F1F6F2] p-1 rounded-full shrink-0 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-              title="Tutup dialog"
-            >
-              <X size={12} />
-            </button>
+          <div className="relative bg-white/95 dark:bg-[#1B231C]/95 backdrop-blur-md text-[#242D22] dark:text-[#F1F6F2] text-xs font-medium p-3 rounded-2xl shadow-xl border border-[#DEE7D0] dark:border-[#2C3B2E] flex flex-col gap-2 leading-relaxed">
+            <div className="flex items-start gap-2.5">
+              <p className="text-[11px] sm:text-xs flex-1">{speech}</p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                }}
+                className="text-[#7A8E80] hover:text-[#242D22] dark:hover:text-[#F1F6F2] p-1 rounded-full shrink-0 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                title="Tutup dialog"
+              >
+                <X size={12} />
+              </button>
+            </div>
+
+            <div className="pt-2 border-t border-[#DEE7D0]/60 dark:border-[#2C3B2E]/60 flex items-center justify-between text-[10px] text-[#7A8E80] dark:text-[#A0B2A3]">
+              <span>Ingin sembunyikan Bloomie?</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowBloomie(false);
+                  triggerXpCelebration(0, "Bloomie kecil disembunyikan. Bisa diaktifkan lagi di Pengaturan!");
+                }}
+                className="text-rose-500 hover:text-rose-600 dark:text-rose-400 font-semibold hover:underline cursor-pointer flex items-center gap-1"
+                title="Sembunyikan maskot kecil ini"
+              >
+                <EyeOffIcon size={11} />
+                <span>Sembunyikan</span>
+              </button>
+            </div>
 
             {/* Pointer arrow pointing down to Bloomie's head */}
             <div
@@ -322,6 +364,7 @@ export function BloomieFloatingCompanion() {
           interactive={false}
           showShadow={!isDragging}
           showBubble={false}
+          isSquinting={isBouncing}
         />
       </div>
     </div>

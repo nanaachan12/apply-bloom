@@ -10,12 +10,35 @@ import {
   Sparkles,
   CheckCircle2,
   Lock,
+  Eye,
 } from "lucide-react";
 import { useApp } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
+import { BloomieMascot } from "@/components/mascot/BloomieMascot";
+
+function EyeOffIcon({ size = 12, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+      <path d="m2 2 20 20" />
+    </svg>
+  );
+}
 
 export default function SettingsPage() {
-  const { user, profile, refreshProfile, triggerXpCelebration } = useApp();
+  const { user, profile, refreshProfile, triggerXpCelebration, showBloomie, toggleBloomie } = useApp();
 
   const [name, setName] = useState("");
   const [timezone, setTimezone] = useState("Asia/Jakarta");
@@ -145,6 +168,101 @@ export default function SettingsPage() {
               </Button>
             </div>
           </form>
+        </div>
+
+        {/* Mascot & UI Preferences Card */}
+        <div className="p-6 sm:p-7 rounded-3xl bg-[#F8FAF4] dark:bg-[#182019] border border-[#DEE7D0] dark:border-[#263328] shadow-xs transition-colors">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-bold text-[#242D22] dark:text-[#F1F6F2] flex items-center gap-2">
+              <Sparkles size={18} className="text-[#788B4E] dark:text-[#9BC358]" />
+              <span>Tampilan & Maskot Bloomie</span>
+            </h3>
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                showBloomie
+                  ? "bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] border-[#DEE7D0] dark:border-[#2C3B2E]"
+                  : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700"
+              }`}
+            >
+              {showBloomie ? (
+                <>
+                  <Eye size={12} />
+                  <span>Aktif (Ditampilkan)</span>
+                </>
+              ) : (
+                <>
+                  <EyeOffIcon size={12} />
+                  <span>Disembunyikan</span>
+                </>
+              )}
+            </span>
+          </div>
+
+          <p className="text-xs text-[#616D64] dark:text-[#A0B2A3] leading-relaxed mb-5">
+            Atur apakah maskot Bloomie kecil yang melayang di pojok layar ingin ditampilkan atau disembunyikan.
+          </p>
+
+          {/* Toggle Item */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#232E25] flex items-center justify-between gap-4 transition-colors">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#EEF3E2] dark:bg-[#1E281F] border border-[#DEE7D0] dark:border-[#2C3B2E] flex items-center justify-center shrink-0 overflow-hidden">
+                <BloomieMascot
+                  mood={showBloomie ? "happy" : "sleep"}
+                  size="sm"
+                  interactive={false}
+                  showShadow={false}
+                  showBubble={false}
+                  enableEyeTracking={false}
+                  className="scale-65"
+                />
+              </div>
+              <div>
+                <strong className="text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2] block mb-0.5">
+                  Bloomie Kecil (Floating Companion)
+                </strong>
+                <span className="text-[11px] sm:text-xs text-[#616D64] dark:text-[#A0B2A3] block">
+                  {showBloomie
+                    ? "Maskot aktif mengambang di pojok layar, bisa digeser (drag & drop)."
+                    : "Maskot disembunyikan untuk tampilan yang lebih minimalis."}
+                </span>
+              </div>
+            </div>
+
+            {/* Toggle Switch */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showBloomie}
+              onClick={() => {
+                toggleBloomie();
+                triggerXpCelebration(
+                  0,
+                  !showBloomie
+                    ? "Bloomie kecil kembali aktif menemani layarmu! ✨"
+                    : "Bloomie kecil disembunyikan."
+                );
+              }}
+              className={`relative inline-flex h-7 w-13 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-[#788B4E]/40 ${
+                showBloomie ? "bg-[#788B4E] dark:bg-[#9BC358]" : "bg-neutral-300 dark:bg-neutral-700"
+              }`}
+            >
+              <span className="sr-only">Toggle Bloomie Kecil</span>
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  showBloomie ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Context tip */}
+          <div className="mt-3.5 p-3 rounded-2xl bg-[#EEF3E2]/60 dark:bg-[#1E281F]/60 border border-[#DEE7D0]/60 dark:border-[#2C3B2E]/60 text-[11px] text-[#616D64] dark:text-[#A0B2A3] flex items-center gap-2">
+            <span className="shrink-0 text-base">🌱</span>
+            <span>
+              Catatan: Meskipun Bloomie kecil disembunyikan, kamu tetap dapat berinteraksi dengan Bloomie utama di halaman <strong>Kebun Virtual (Bloom Garden)</strong>.
+            </span>
+          </div>
         </div>
 
         {/* Security & Multi-User Architecture Card */}
