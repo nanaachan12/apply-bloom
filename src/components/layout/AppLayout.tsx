@@ -22,6 +22,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/api";
 import { UserSession, GamificationProfileDto } from "@/types";
+import { clearCache } from "@/lib/cache";
+import { BloomieFloatingCompanion } from "@/components/mascot/BloomieFloatingCompanion";
 
 export interface AppContextType {
   user: UserSession | null;
@@ -77,6 +79,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const triggerRefresh = () => {
+    clearCache();
     setRefreshTimestamp(Date.now());
   };
 
@@ -201,6 +204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("applybloom_token");
       localStorage.setItem("applybloom_logged_out", "true");
     }
+    clearCache();
     setUser(null);
     setProfile(null);
     setIsAuthModalOpen(true);
@@ -439,7 +443,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               <input
                 type="password"
                 required
-                placeholder="••••••••"
+                placeholder="Kata sandi anda"
                 value={authPassword}
                 onChange={(e) => setAuthPassword(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1D5] bg-white text-sm text-[#282D29] focus:outline-hidden focus:ring-2 focus:ring-[#2D5A43]/20 focus:border-[#2D5A43]"
@@ -514,7 +518,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             {isLoadingAuth ? (
               <WireframeSkeleton type={getSkeletonType()} />
             ) : (
-              children
+              <div key={pathname} className="animate-in fade-in duration-150">
+                {children}
+              </div>
             )}
           </div>
         </main>
@@ -522,6 +528,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Curved Bottom Navigation Bar with Scooped Floating Active Circle */}
       <BottomNavbar />
+
+      {/* Interactive Bloomie Mascot Floating Companion */}
+      {user && !isLoadingAuth && <BloomieFloatingCompanion />}
     </div>
   );
 }

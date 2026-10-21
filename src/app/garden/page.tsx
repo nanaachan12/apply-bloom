@@ -12,7 +12,7 @@ import {
   HelpCircle,
   TrendingUp,
 } from "lucide-react";
-import { AppLayout, useApp } from "@/components/layout/AppLayout";
+import { useApp } from "@/components/layout/AppLayout";
 import { PlantVisual } from "@/components/garden/PlantVisual";
 import { BadgeGrid } from "@/components/garden/BadgeGrid";
 import { Button } from "@/components/ui/Button";
@@ -20,19 +20,26 @@ import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { BadgeDto, XpTransactionDto } from "@/types";
 import { PLANT_STAGES, XP_RULES } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
+import { getCached, setCached, clearCache } from "@/lib/cache";
+import { BloomieMascot } from "@/components/mascot/BloomieMascot";
 
 export default function BloomGardenPage() {
   const { user, profile, refreshProfile, triggerXpCelebration } = useApp();
 
-  const [gamificationData, setGamificationData] = useState<any>(null);
-  const [badges, setBadges] = useState<BadgeDto[]>([]);
-  const [xpHistory, setXpHistory] = useState<XpTransactionDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedGam = getCached<any>("garden_gamification");
+  const cachedBadges = getCached<BadgeDto[]>("garden_badges");
+  const cachedHistory = getCached<XpTransactionDto[]>("garden_history");
+  const hasCache = !!cachedGam;
 
-  const fetchGardenData = async () => {
+  const [gamificationData, setGamificationData] = useState<any>(cachedGam);
+  const [badges, setBadges] = useState<BadgeDto[]>(cachedBadges || []);
+  const [xpHistory, setXpHistory] = useState<XpTransactionDto[]>(cachedHistory || []);
+  const [isLoading, setIsLoading] = useState(!hasCache);
+
+  const fetchGardenData = async (showLoading = !hasCache) => {
     if (!user) return;
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const [gamRes, badRes, histRes] = await Promise.all([
         apiFetch("/api/v1/gamification/me"),
         apiFetch("/api/v1/gamification/badges"),
@@ -42,14 +49,19 @@ export default function BloomGardenPage() {
       if (gamRes.ok) {
         const j = await gamRes.json();
         setGamificationData(j.data);
+        setCached("garden_gamification", j.data);
       }
       if (badRes.ok) {
         const j = await badRes.json();
-        setBadges(j.data || []);
+        const b = j.data || [];
+        setBadges(b);
+        setCached("garden_badges", b);
       }
       if (histRes.ok) {
         const j = await histRes.json();
-        setXpHistory(j.data || []);
+        const h = j.data || [];
+        setXpHistory(h);
+        setCached("garden_history", h);
       }
     } catch (err) {
       console.error("Garden data error:", err);
@@ -60,7 +72,7 @@ export default function BloomGardenPage() {
 
   useEffect(() => {
     if (user) {
-      fetchGardenData();
+      fetchGardenData(!hasCache);
     }
   }, [user]);
 
@@ -72,8 +84,41 @@ export default function BloomGardenPage() {
   const xpNeeded = 100 - xpInLevel;
   const progressPercent = Math.min(100, Math.max(0, xpInLevel));
 
+  const handleWaterPlant = async () => {
+    try {
+      const res = await apiFetch("/api/v1/gamification/water", {
+        method: "POST",
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        alert(json.error || "Gagal menyiram tanaman");
+        return false;
+      }
+
+      triggerXpCelebration(5, json.message || "Tanaman berhasil disiram! +5 XP");
+
+      setGamificationData((prev: any) => ({
+        ...prev,
+        totalXp: json.totalXp,
+        level: json.level,
+        plantStage: json.plantStage,
+        waterCountToday: json.waterCountToday,
+        remainingWater: json.remainingWater,
+        canWater: json.canWater,
+      }));
+
+      clearCache("garden_");
+      clearCache("dashboard_");
+      refreshProfile();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
-    <AppLayout>
+    <>
       {isLoading ? (
         <WireframeSkeleton type="garden" />
       ) : (
@@ -116,17 +161,36 @@ export default function BloomGardenPage() {
             </span>
           </div>
 
-          {/* Plant Illustration */}
-          <div className="my-4">
-            <PlantVisual
-              stage={currentStage}
-              level={currentLevel}
-              interactive={true}
-              onWater={() => {
-                triggerXpCelebration(5, "Tanaman berhasil disiram!");
-                refreshProfile();
-              }}
-            />
+          {/* Plant & Bloomie Mascot Showcase */}
+          <div className="my-4 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-3xl">
+            {/* The Plant */}
+            <div className="flex-1 flex justify-center">
+              <PlantVisual
+                stage={currentStage}
+                level={currentLevel}
+                interactive={true}
+                waterCountToday={gamificationData?.waterCountToday ?? profile?.waterCountToday ?? 0}
+                maxWaterPerDay={gamificationData?.maxWaterPerDay ?? profile?.maxWaterPerDay ?? 3}
+                remainingWater={gamificationData?.remainingWater ?? profile?.remainingWater ?? 3}
+                canWater={gamificationData?.canWater ?? profile?.canWater ?? true}
+                onWater={handleWaterPlant}
+              />
+            </div>
+
+            {/* Bloomie Companion */}
+            <div className="flex flex-col items-center justify-center p-3 text-center">
+              <BloomieMascot
+                mood="auto"
+                size="md"
+              />
+              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2] mt-2 flex items-center gap-1.5 justify-center">
+                <span>Bloomie</span>
+                <span className="text-xs">🌱</span>
+              </h4>
+              <p className="text-[11px] text-[#616D64] dark:text-[#A0B2A3] mt-0.5 leading-relaxed max-w-[200px]">
+                Ketuk Bloomie untuk sapaan, efek ceria, dan kata motivasi karir! ✨
+              </p>
+            </div>
           </div>
 
           {/* Progress Bar To Next Level */}
@@ -275,6 +339,6 @@ export default function BloomGardenPage() {
         </div>
       </div>
       )}
-    </AppLayout>
+    </>
   );
 }

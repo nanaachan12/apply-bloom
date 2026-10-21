@@ -122,9 +122,14 @@ export function Sidebar({
                 <span className="font-heading font-bold text-sm text-white tracking-tight truncate block">
                   {user?.name || "Kandidat Bloom"}
                 </span>
-                <span className="text-[11px] text-[#E2EBD3] dark:text-[#8E9F90] truncate block">
-                  Level {profile?.level ?? 1} • {profile?.totalXp ?? 0} XP
-                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/20 dark:bg-[#233125] text-white dark:text-[#A8D063]">
+                    Level {profile?.level ?? 1}
+                  </span>
+                  <span className="text-[11px] text-[#E2EBD3] dark:text-[#8E9F90] font-medium">
+                    {profile?.totalXp ?? 0} XP
+                  </span>
+                </div>
               </div>
             </Link>
 
@@ -192,6 +197,7 @@ export function Sidebar({
                     itemRefs.current[index] = el;
                   }}
                   href={item.href}
+                  prefetch={true}
                   onClick={() => {
                     setActivePath(item.href);
                     onClose();

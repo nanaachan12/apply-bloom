@@ -109,7 +109,7 @@ export function ApplicationDetailDrawer({
                 </span>
                 {application.location && (
                   <>
-                    <span>•</span>
+                    <span className="w-px h-3 bg-[#DEE7D0] dark:bg-[#28382A]" />
                     <span className="flex items-center gap-1">
                       <MapPin size={13} className="text-[#7A8E80]" />
                       {application.location}

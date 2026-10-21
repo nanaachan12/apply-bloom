@@ -19,7 +19,7 @@ import {
   Activity,
   TrendingUp,
 } from "lucide-react";
-import { AppLayout, useApp } from "@/components/layout/AppLayout";
+import { useApp } from "@/components/layout/AppLayout";
 import { PlantVisual } from "@/components/garden/PlantVisual";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/Badge";
@@ -27,6 +27,14 @@ import { ReminderModal } from "@/components/reminders/ReminderModal";
 import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
 import { DashboardSummaryDto, ApplicationDto, ReminderDto } from "@/types";
 import { apiFetch } from "@/lib/api";
+import { getCached, setCached, clearCache } from "@/lib/cache";
+import { BloomieMascot } from "@/components/mascot/BloomieMascot";
+
+const HERO_BLOOMIE_GREETINGS = [
+  "Halo! Selamat datang di ApplyBloom. Aku Bloomie, teman yang siap menemani perjalanan karirmu.",
+  "Senang bertemu denganmu. Mari bersama wujudkan pekerjaan impianmu langkah demi langkah.",
+  "Tetap semangat dan konsisten ya. Aku ada di sini untuk mendukung setiap proses lamaranmu.",
+];
 
 export default function DashboardPage() {
   const {
@@ -37,17 +45,23 @@ export default function DashboardPage() {
     triggerXpCelebration,
     refreshTimestamp,
   } = useApp();
-  const [summary, setSummary] = useState<DashboardSummaryDto | null>(null);
-  const [applications, setApplications] = useState<ApplicationDto[]>([]);
-  const [recentEvents, setRecentEvents] = useState<any[]>([]);
-  const [trends, setTrends] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedSummary = getCached<DashboardSummaryDto>("dashboard_summary");
+  const cachedApps = getCached<ApplicationDto[]>("dashboard_applications");
+  const cachedEvents = getCached<any[]>("dashboard_events");
+  const cachedTrends = getCached<any>("dashboard_trends");
+  const hasInitialCache = !!cachedSummary && !!cachedApps;
+
+  const [summary, setSummary] = useState<DashboardSummaryDto | null>(cachedSummary);
+  const [applications, setApplications] = useState<ApplicationDto[]>(cachedApps || []);
+  const [recentEvents, setRecentEvents] = useState<any[]>(cachedEvents || []);
+  const [trends, setTrends] = useState<any>(cachedTrends);
+  const [isLoading, setIsLoading] = useState(!hasInitialCache);
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (showLoading = !hasInitialCache) => {
     if (!user) return;
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const [sumRes, appsRes, actRes, trendRes] = await Promise.all([
         apiFetch("/api/v1/dashboard/summary"),
         apiFetch("/api/v1/applications?limit=20"),
@@ -58,18 +72,22 @@ export default function DashboardPage() {
       if (sumRes.ok) {
         const d = await sumRes.json();
         setSummary(d.data);
+        setCached("dashboard_summary", d.data);
       }
       if (appsRes.ok) {
         const d = await appsRes.json();
         setApplications(d.data || []);
+        setCached("dashboard_applications", d.data || []);
       }
       if (actRes.ok) {
         const d = await actRes.json();
         setRecentEvents(d.data?.events || []);
+        setCached("dashboard_events", d.data?.events || []);
       }
       if (trendRes.ok) {
         const d = await trendRes.json();
         setTrends(d.data);
+        setCached("dashboard_trends", d.data);
       }
     } catch (err) {
       console.error("Dashboard fetch error:", err);
@@ -80,7 +98,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      fetchDashboardData();
+      fetchDashboardData(!hasInitialCache);
     }
   }, [user, refreshTimestamp]);
 
@@ -103,42 +121,91 @@ export default function DashboardPage() {
     }
   };
 
+  const handleWaterPlant = async () => {
+    try {
+      const res = await apiFetch("/api/v1/gamification/water", {
+        method: "POST",
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        alert(json.error || "Gagal menyiram tanaman");
+        return false;
+      }
+
+      triggerXpCelebration(5, json.message || "Tanaman berhasil disiram! +5 XP");
+
+      setSummary((prev: any) =>
+        prev
+          ? {
+              ...prev,
+              totalXp: json.totalXp,
+              level: json.level,
+              plantStage: json.plantStage,
+              waterCountToday: json.waterCountToday,
+              remainingWater: json.remainingWater,
+              canWater: json.canWater,
+            }
+          : prev
+      );
+
+      clearCache("dashboard_");
+      clearCache("garden_");
+      refreshProfile();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
-    <AppLayout>
+    <>
       {isLoading ? (
         <WireframeSkeleton type="dashboard" />
       ) : (
         <div className="space-y-6">
           {/* Welcome Banner - Olive Sage & Strawberry Pink */}
-          <div className="relative overflow-hidden p-5 sm:p-7 rounded-3xl bg-linear-to-r from-[#EEF3E2] via-[#F4F8EB] to-[#FFF0F3] dark:from-[#19221B] dark:via-[#161D17] dark:to-[#26151D] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-2xs transition-colors duration-200">
-          <div className="relative z-10 max-w-xl">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-[#233125] text-[#556832] dark:text-[#A8D063] border border-[#D5E0BF] dark:border-[#354837] mb-2.5 shadow-2xs">
-              <Sparkles size={12} className="text-[#788B4E] dark:text-[#9BC358]" />
-              <span>Career & Application Tracker</span>
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading">
-              Selamat datang, {user ? user.name : "Kandidat"}
-            </h2>
-            <p className="text-xs sm:text-sm text-[#647363] dark:text-[#8E9F90] mt-1.5 leading-relaxed">
-              Pantau seluruh proses rekrutmen kerja dan bangun kebiasaan melamar yang terstruktur setiap hari.
-            </p>
+          <div className="relative p-5 sm:p-7 rounded-3xl bg-linear-to-r from-[#EEF3E2] via-[#F4F8EB] to-[#FFF0F3] dark:from-[#19221B] dark:via-[#161D17] dark:to-[#26151D] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-2xs transition-colors duration-200">
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+              <div className="max-w-xl">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-[#233125] text-[#556832] dark:text-[#A8D063] border border-[#D5E0BF] dark:border-[#354837] mb-2.5 shadow-2xs">
+                  <Sparkles size={12} className="text-[#788B4E] dark:text-[#9BC358]" />
+                  <span>Career & Application Tracker</span>
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading">
+                  Selamat datang, {user ? user.name : "Kandidat"}
+                </h2>
+                <p className="text-xs sm:text-sm text-[#647363] dark:text-[#8E9F90] mt-1.5 leading-relaxed">
+                  Pantau seluruh proses rekrutmen kerja dan bangun kebiasaan melamar yang terstruktur setiap hari.
+                </p>
 
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 mt-4">
-              <Button size="sm" variant="primary" onClick={openAddModal}>
-                <Plus size={14} />
-                <span>Tambah Lamaran</span>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsReminderModalOpen(true)}
-              >
-                <Clock size={14} />
-                <span>Jadwalkan Agenda</span>
-              </Button>
+                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 mt-4">
+                  <Button size="sm" variant="primary" onClick={openAddModal}>
+                    <Plus size={14} />
+                    <span>Tambah Lamaran</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsReminderModalOpen(true)}
+                  >
+                    <Clock size={14} />
+                    <span>Jadwalkan Agenda</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Bloomie Welcome Mascot */}
+              <div className="flex flex-col items-center shrink-0 self-center sm:self-end sm:pr-4 pt-6 sm:pt-10 pb-1">
+                <BloomieMascot
+                  mood="auto"
+                  size="md"
+                  bubblePlacement="top"
+                  speechList={HERO_BLOOMIE_GREETINGS}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
         {/* 4 Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -263,17 +330,22 @@ export default function DashboardPage() {
                   stage={summary?.plantStage ?? profile?.plantStage ?? 1}
                   level={summary?.level ?? profile?.level ?? 2}
                   interactive={true}
-                  onWater={() => {
-                    triggerXpCelebration(5, "Tanaman berhasil disiram (+5 XP)");
-                  }}
+                  waterCountToday={summary?.waterCountToday ?? profile?.waterCountToday ?? 0}
+                  maxWaterPerDay={summary?.maxWaterPerDay ?? profile?.maxWaterPerDay ?? 3}
+                  remainingWater={summary?.remainingWater ?? profile?.remainingWater ?? 3}
+                  canWater={summary?.canWater ?? profile?.canWater ?? true}
+                  onWater={handleWaterPlant}
                 />
               </div>
 
               {/* Level Progress */}
               <div className="p-4 rounded-2xl bg-white dark:bg-[#1E281F] border border-[#DEE7D0] dark:border-[#2C3B2E] mt-2 transition-colors">
                 <div className="flex items-center justify-between text-xs font-semibold text-[#242D22] dark:text-[#F1F6F2] mb-2">
-                  <span>
-                    Level {summary?.level ?? 1} • {summary?.plantStageName}
+                  <span className="flex items-center gap-1.5">
+                    <span className="px-1.5 py-0.5 rounded-md bg-[#EDF2E4] dark:bg-[#233125] text-[#556534] dark:text-[#9BC358] text-[10px] font-bold">
+                      Level {summary?.level ?? 1}
+                    </span>
+                    <span>{summary?.plantStageName}</span>
                   </span>
                   <span className="text-[#556832] dark:text-[#A8D063]">
                     {(summary?.totalXp ?? 0) % 100} / 100 XP
@@ -392,8 +464,10 @@ export default function DashboardPage() {
                             {rem.title}
                           </p>
                           {rem.application && (
-                            <p className="text-[11px] font-medium text-[#788B4E] dark:text-[#9BC358] mt-0.5">
-                              {rem.application.company} • {rem.application.position}
+                            <p className="text-[11px] font-medium text-[#788B4E] dark:text-[#9BC358] mt-0.5 flex items-center gap-1.5">
+                              <span>{rem.application.company}</span>
+                              <span className="text-[#7A8E80] dark:text-[#58685C] font-light">/</span>
+                              <span>{rem.application.position}</span>
                             </p>
                           )}
                           <p className="text-[10px] text-[#7A8E80] dark:text-[#7A8E80] mt-1 flex items-center gap-1">
@@ -489,6 +563,6 @@ export default function DashboardPage() {
           fetchDashboardData();
         }}
       />
-    </AppLayout>
+    </>
   );
 }

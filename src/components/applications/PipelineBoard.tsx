@@ -60,6 +60,7 @@ export function PipelineBoard({
   };
 
   const [activeMobileCol, setActiveMobileCol] = React.useState<ApplicationStatusType>("WISHLIST");
+  const boardContainerRef = React.useRef<HTMLDivElement>(null);
 
   return (
     <div className="space-y-3">
@@ -71,10 +72,15 @@ export function PipelineBoard({
           return (
             <button
               key={colStatus}
+              type="button"
               onClick={() => {
                 setActiveMobileCol(colStatus);
                 const el = document.getElementById(`pipeline-col-${colStatus}`);
-                el?.scrollIntoView({ behavior: "smooth", inline: "center" });
+                if (el && boardContainerRef.current) {
+                  const container = boardContainerRef.current;
+                  const targetLeft = el.offsetLeft - container.offsetLeft - 12;
+                  container.scrollTo({ left: targetLeft, behavior: "smooth" });
+                }
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer ${
                 isActive
@@ -96,7 +102,10 @@ export function PipelineBoard({
       </div>
 
       {/* Board Columns */}
-      <div className="flex gap-4 overflow-x-auto pb-6 pt-2 items-start min-h-[550px] scrollbar-thin snap-x snap-mandatory">
+      <div
+        ref={boardContainerRef}
+        className="flex gap-4 overflow-x-auto pb-6 pt-2 items-start min-h-[550px] scrollbar-thin snap-x snap-mandatory"
+      >
         {PIPELINE_COLUMNS.map((colStatus) => {
           const colMeta = STATUS_META[colStatus];
           const colApps = applications.filter((a) => a.status === colStatus);

@@ -100,6 +100,7 @@ export function BottomNavbar() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 onClick={() => setActiveTab(item.href)}
                 className="w-1/5 flex flex-col items-center justify-center pt-2 pb-1 text-center cursor-pointer select-none group"
               >

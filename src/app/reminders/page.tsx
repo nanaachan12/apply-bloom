@@ -11,28 +11,35 @@ import {
   Trash2,
   Filter,
 } from "lucide-react";
-import { AppLayout, useApp } from "@/components/layout/AppLayout";
+import { useApp } from "@/components/layout/AppLayout";
 import { ReminderModal } from "@/components/reminders/ReminderModal";
 import { Button } from "@/components/ui/Button";
 import { ReminderDto, ApplicationDto } from "@/types";
 import { REMINDER_TYPE_META, ReminderTypeType } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
+import { getCached, setCached, clearCache } from "@/lib/cache";
 
 export default function RemindersPage() {
   const { user, triggerXpCelebration } = useApp();
-  const [reminders, setReminders] = useState<ReminderDto[]>([]);
-  const [applications, setApplications] = useState<ApplicationDto[]>([]);
   const [filter, setFilter] = useState<"upcoming" | "completed" | "all">(
     "upcoming"
   );
   const [typeFilter, setTypeFilter] = useState("ALL");
-  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchReminders = async () => {
+  const cacheKey = `reminders_${filter}_${typeFilter}`;
+  const cachedReminders = getCached<ReminderDto[]>(cacheKey);
+  const cachedApps = getCached<ApplicationDto[]>("reminders_apps");
+  const hasCache = !!cachedReminders;
+
+  const [reminders, setReminders] = useState<ReminderDto[]>(cachedReminders || []);
+  const [applications, setApplications] = useState<ApplicationDto[]>(cachedApps || []);
+  const [isLoading, setIsLoading] = useState(!hasCache);
+
+  const fetchReminders = async (showLoading = !hasCache) => {
     if (!user) return;
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const params = new URLSearchParams({ filter });
       if (typeFilter !== "ALL") params.append("type", typeFilter);
 
@@ -43,11 +50,15 @@ export default function RemindersPage() {
 
       if (remRes.ok) {
         const json = await remRes.json();
-        setReminders(json.data || []);
+        const list = json.data || [];
+        setReminders(list);
+        setCached(cacheKey, list);
       }
       if (appsRes.ok) {
         const json = await appsRes.json();
-        setApplications(json.data || []);
+        const appList = json.data || [];
+        setApplications(appList);
+        setCached("reminders_apps", appList);
       }
     } catch (err) {
       console.error("Fetch reminders error:", err);
@@ -58,7 +69,7 @@ export default function RemindersPage() {
 
   useEffect(() => {
     if (user) {
-      fetchReminders();
+      fetchReminders(!hasCache);
     }
   }, [user, filter, typeFilter]);
 
@@ -93,7 +104,7 @@ export default function RemindersPage() {
   };
 
   return (
-    <AppLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -170,7 +181,16 @@ export default function RemindersPage() {
 
         {/* Reminders List */}
         <div className="space-y-3">
-          {reminders.length > 0 ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 rounded-3xl bg-[#EEF3E2]/60 dark:bg-[#1E281F]/40 animate-pulse border border-[#DEE7D0]/60 dark:border-[#28382A]/40"
+                />
+              ))}
+            </div>
+          ) : reminders.length > 0 ? (
             reminders.map((rem) => {
               const isDone = Boolean(rem.completedAt);
               const meta =
@@ -213,12 +233,14 @@ export default function RemindersPage() {
                       </div>
 
                       {rem.application && (
-                        <p className="text-xs font-medium text-[#788B4E] dark:text-[#9BC358] mt-0.5">
-                          {rem.application.company} • {rem.application.position}
+                        <p className="text-xs font-medium text-[#788B4E] dark:text-[#9BC358] mt-0.5 flex items-center gap-1.5">
+                          <span>{rem.application.company}</span>
+                          <span className="text-[#7A8E80] dark:text-[#58685C] font-light">/</span>
+                          <span>{rem.application.position}</span>
                         </p>
                       )}
 
-                      <div className="flex items-center gap-3 text-xs text-[#616D64] dark:text-[#A0B2A3] mt-2">
+                      <div className="flex items-center gap-2.5 text-xs text-[#616D64] dark:text-[#A0B2A3] mt-2">
                         <span className="flex items-center gap-1">
                           <Calendar size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
                           {new Date(rem.dueAt).toLocaleDateString("id-ID", {
@@ -228,7 +250,7 @@ export default function RemindersPage() {
                             year: "numeric",
                           })}
                         </span>
-                        <span>•</span>
+                        <span className="w-px h-3 bg-[#DEE7D0] dark:bg-[#28382A]" />
                         <span className="flex items-center gap-1">
                           <Clock size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
                           {new Date(rem.dueAt).toLocaleTimeString("id-ID", {
@@ -291,6 +313,6 @@ export default function RemindersPage() {
           triggerXpCelebration(5, "Jadwal berhasil ditambahkan!");
         }}
       />
-    </AppLayout>
+    </>
   );
 }

@@ -37,6 +37,23 @@ export async function GET(req: NextRequest) {
   const currentStageMeta = PLANT_STAGES[profile.plantStage] || PLANT_STAGES[0];
   const nextStageMeta = PLANT_STAGES[Math.min(PLANT_STAGES.length - 1, profile.plantStage + 1)];
 
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
+  const waterCountToday = await prisma.xpTransaction.count({
+    where: {
+      userId,
+      sourceType: "WATER_PLANT",
+      createdAt: {
+        gte: startOfDay,
+      },
+    },
+  });
+
+  const maxWaterPerDay = 3;
+  const remainingWater = Math.max(0, maxWaterPerDay - waterCountToday);
+  const canWater = remainingWater > 0;
+
   return NextResponse.json({
     data: {
       totalXp: profile.totalXp,
@@ -50,6 +67,10 @@ export async function GET(req: NextRequest) {
       xpNeededForNextLevel: 100 - xpInCurrentLevel,
       progressPercent,
       lastActiveDate: profile.lastActiveDate,
+      waterCountToday,
+      maxWaterPerDay,
+      remainingWater,
+      canWater,
     },
   });
 }

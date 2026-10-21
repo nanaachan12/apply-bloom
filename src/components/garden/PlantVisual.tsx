@@ -2,20 +2,28 @@
 
 import React, { useState } from "react";
 import confetti from "canvas-confetti";
-import { Sparkles, Droplets } from "lucide-react";
+import { Sparkles, Droplets, Clock } from "lucide-react";
 import { PLANT_STAGES } from "@/lib/constants";
 
 interface PlantVisualProps {
   stage: number;
   level: number;
   interactive?: boolean;
-  onWater?: () => void;
+  waterCountToday?: number;
+  maxWaterPerDay?: number;
+  remainingWater?: number;
+  canWater?: boolean;
+  onWater?: () => Promise<boolean | void> | void;
 }
 
 export function PlantVisual({
   stage = 0,
   level = 1,
   interactive = true,
+  waterCountToday = 0,
+  maxWaterPerDay = 3,
+  remainingWater = 3,
+  canWater = true,
   onWater,
 }: PlantVisualProps) {
   const [isWatering, setIsWatering] = useState(false);
@@ -24,27 +32,46 @@ export function PlantVisual({
   const safeStage = Math.min(Math.max(0, stage), 4);
   const currentStageInfo = PLANT_STAGES[safeStage] || PLANT_STAGES[0];
 
-  const handleWaterClick = () => {
+  const isQuotaExhausted = !canWater || remainingWater <= 0;
+
+  const handleWaterClick = async () => {
+    if (isQuotaExhausted || isWatering) return;
     setIsWatering(true);
-    setLastWateredTime(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }));
 
-    // Trigger sweet confetti burst
     try {
-      confetti({
-        particleCount: 25,
-        spread: 50,
-        origin: { y: 0.7 },
-        colors: ["#2D5A43", "#D95D70", "#EBF3ED", "#FAF7F2", "#B83E51"],
-      });
+      if (onWater) {
+        const result = await onWater();
+        if (result === false) {
+          setIsWatering(false);
+          return;
+        }
+      }
+
+      setLastWateredTime(
+        new Date().toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+
+      // Trigger sweet confetti burst
+      try {
+        confetti({
+          particleCount: 25,
+          spread: 50,
+          origin: { y: 0.7 },
+          colors: ["#2D5A43", "#D95D70", "#EBF3ED", "#FAF7F2", "#B83E51"],
+        });
+      } catch {
+        // safe fallback
+      }
     } catch {
-      // safe fallback
+      // ignore
+    } finally {
+      setTimeout(() => {
+        setIsWatering(false);
+      }, 1200);
     }
-
-    if (onWater) onWater();
-
-    setTimeout(() => {
-      setIsWatering(false);
-    }, 1200);
   };
 
   return (
@@ -426,9 +453,12 @@ export function PlantVisual({
 
       {/* Stage Title & Info */}
       <div className="text-center mt-2 max-w-sm">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EDF2E4] dark:bg-[#1E281F] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A] mb-1.5">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#EDF2E4] dark:bg-[#1E281F] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A] mb-1.5">
           <Sparkles size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
-          <span>Level {level} • {currentStageInfo.title}</span>
+          <span className="px-1.5 py-0.5 rounded-md bg-[#788B4E]/15 dark:bg-[#9BC358]/20 font-bold text-[11px]">
+            Level {level}
+          </span>
+          <span>{currentStageInfo.title}</span>
         </div>
         <h4 className="text-base sm:text-lg font-bold text-[#242D22] dark:text-[#F1F6F2]">
           {currentStageInfo.name}
@@ -438,21 +468,52 @@ export function PlantVisual({
         </p>
       </div>
 
-      {/* Interactive Water Button */}
+      {/* Interactive Water Button & Daily Quota */}
       {interactive && (
-        <div className="mt-4 flex flex-col items-center gap-1.5">
-          <button
-            onClick={handleWaterClick}
-            disabled={isWatering}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-[#EDF2E4] dark:bg-[#1F2B20] hover:bg-[#DEE7D0] dark:hover:bg-[#28382A] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A] shadow-xs active:scale-95 transition-all cursor-pointer"
-          >
-            <Droplets size={16} className={`text-[#788B4E] dark:text-[#9BC358] ${isWatering ? "animate-bounce" : ""}`} />
-            <span>{isWatering ? "Menyirami..." : "Sirami Tanaman"}</span>
-          </button>
-          {lastWateredTime && (
-            <span className="text-[11px] text-[#7A8E80]">
-              Disiram terakhir pukul {lastWateredTime}
-            </span>
+        <div className="mt-4 flex flex-col items-center gap-2">
+          {!isQuotaExhausted ? (
+            <>
+              <button
+                onClick={handleWaterClick}
+                disabled={isWatering}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-[#EDF2E4] dark:bg-[#1F2B20] hover:bg-[#DEE7D0] dark:hover:bg-[#28382A] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A] shadow-xs active:scale-95 transition-all cursor-pointer"
+              >
+                <Droplets
+                  size={16}
+                  className={`text-[#788B4E] dark:text-[#9BC358] ${
+                    isWatering ? "animate-bounce" : ""
+                  }`}
+                />
+                <span>
+                  {isWatering ? "Menyirami..." : "Sirami Tanaman (+5 XP)"}
+                </span>
+              </button>
+              <div className="flex items-center gap-2 text-[11px] text-[#616D64] dark:text-[#A0B2A3]">
+                <span className="font-semibold text-[#556534] dark:text-[#9BC358]">
+                  Sisa jatah hari ini: {remainingWater}/{maxWaterPerDay} kali
+                </span>
+                {lastWateredTime && (
+                  <>
+                    <span className="w-px h-2.5 bg-[#DEE7D0] dark:bg-[#28382A]" />
+                    <span>Terakhir disiram pukul {lastWateredTime}</span>
+                  </>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-center">
+              <button
+                disabled
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-[#EDF2E4]/40 dark:bg-[#182019] text-[#7A8E80] dark:text-[#58685C] border border-[#DEE7D0]/60 dark:border-[#263328] cursor-not-allowed opacity-80"
+              >
+                <Droplets size={16} className="text-[#7A8E80] dark:text-[#58685C]" />
+                <span>Siram Tanaman (0/3)</span>
+              </button>
+              <div className="px-3.5 py-1.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-1.5 shadow-2xs">
+                <Clock size={13} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                <span>Siram tanaman sudah habis, kembali lagi besok</span>
+              </div>
+            </div>
           )}
         </div>
       )}

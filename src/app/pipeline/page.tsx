@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { KanbanSquare, Plus, Sparkles } from "lucide-react";
-import { AppLayout, useApp } from "@/components/layout/AppLayout";
+import { useApp } from "@/components/layout/AppLayout";
 import { PipelineBoard } from "@/components/applications/PipelineBoard";
 import { ApplicationDetailDrawer } from "@/components/applications/ApplicationDetailDrawer";
 import { ApplicationModal } from "@/components/applications/ApplicationModal";
@@ -12,11 +12,13 @@ import { Button } from "@/components/ui/Button";
 import { ApplicationDto } from "@/types";
 import { ApplicationStatusType } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
+import { getCached, setCached, clearCache } from "@/lib/cache";
 
 export default function PipelinePage() {
   const { user, openAddModal, triggerXpCelebration, refreshTimestamp } = useApp();
-  const [applications, setApplications] = useState<ApplicationDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const cachedApps = getCached<ApplicationDto[]>("pipeline_applications");
+  const [applications, setApplications] = useState<ApplicationDto[]>(cachedApps || []);
+  const [isLoading, setIsLoading] = useState(!cachedApps);
 
   // Detail drawer & Modals
   const [selectedApp, setSelectedApp] = useState<ApplicationDto | null>(null);
@@ -29,14 +31,16 @@ export default function PipelinePage() {
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [addCardStatus, setAddCardStatus] = useState<ApplicationStatusType | null>(null);
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (showLoading = !cachedApps) => {
     if (!user) return;
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const res = await apiFetch("/api/v1/applications?limit=100");
       if (res.ok) {
         const json = await res.json();
-        setApplications(json.data || []);
+        const list = json.data || [];
+        setApplications(list);
+        setCached("pipeline_applications", list);
       }
     } catch (err) {
       console.error("Fetch pipeline error:", err);
@@ -47,7 +51,7 @@ export default function PipelinePage() {
 
   useEffect(() => {
     if (user) {
-      fetchApplications();
+      fetchApplications(!cachedApps);
     }
   }, [user, refreshTimestamp]);
 
@@ -71,7 +75,10 @@ export default function PipelinePage() {
         } else {
           triggerXpCelebration(0, `Dipindahkan ke tahap ${newStatus}`);
         }
-        fetchApplications();
+        clearCache("pipeline_");
+        clearCache("apps_");
+        clearCache("dashboard_");
+        fetchApplications(true);
         if (selectedApp?.id === appId) {
           setSelectedApp(json.data?.application || null);
         }
@@ -87,7 +94,10 @@ export default function PipelinePage() {
         method: "DELETE",
       });
       if (res.ok) {
-        fetchApplications();
+        clearCache("pipeline_");
+        clearCache("apps_");
+        clearCache("dashboard_");
+        fetchApplications(true);
         setIsDrawerOpen(false);
       }
     } catch {
@@ -122,7 +132,7 @@ export default function PipelinePage() {
   };
 
   return (
-    <AppLayout>
+    <>
       {isLoading ? (
         <WireframeSkeleton type="pipeline" />
       ) : (
@@ -215,6 +225,6 @@ export default function PipelinePage() {
           fetchApplications();
         }}
       />
-    </AppLayout>
+    </>
   );
 }

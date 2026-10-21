@@ -9,7 +9,7 @@ import {
   ArrowUpDown,
   Building,
 } from "lucide-react";
-import { AppLayout, useApp } from "@/components/layout/AppLayout";
+import { useApp } from "@/components/layout/AppLayout";
 import { ApplicationTable } from "@/components/applications/ApplicationTable";
 import { ApplicationModal } from "@/components/applications/ApplicationModal";
 import { ApplicationDetailDrawer } from "@/components/applications/ApplicationDetailDrawer";
@@ -19,17 +19,22 @@ import { Button } from "@/components/ui/Button";
 import { ApplicationDto } from "@/types";
 import { APPLICATION_STATUS, ApplicationStatusType } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
+import { getCached, setCached, clearCache } from "@/lib/cache";
 
 export default function ApplicationsPage() {
   const { user, openAddModal, triggerXpCelebration, refreshTimestamp } = useApp();
 
-  const [applications, setApplications] = useState<ApplicationDto[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [isLoading, setIsLoading] = useState(true);
+
+  const cacheKey = `apps_${sortBy}_${sortOrder}_${statusFilter}_${search}`;
+  const cached = getCached<{ list: ApplicationDto[]; total: number }>(cacheKey);
+
+  const [applications, setApplications] = useState<ApplicationDto[]>(cached?.list || []);
+  const [totalCount, setTotalCount] = useState(cached?.total || 0);
+  const [isLoading, setIsLoading] = useState(!cached);
 
   // Modals & Drawer state
   const [selectedApp, setSelectedApp] = useState<ApplicationDto | null>(null);
@@ -41,10 +46,10 @@ export default function ApplicationsPage() {
   );
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (showLoading = !cached) => {
     if (!user) return;
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const params = new URLSearchParams({
         limit: "50",
         sortBy,
@@ -56,8 +61,11 @@ export default function ApplicationsPage() {
       const res = await apiFetch(`/api/v1/applications?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
-        setApplications(json.data || []);
-        setTotalCount(json.meta?.total || 0);
+        const list = json.data || [];
+        const total = json.meta?.total || 0;
+        setApplications(list);
+        setTotalCount(total);
+        setCached(cacheKey, { list, total });
       }
     } catch (err) {
       console.error("Fetch apps error:", err);
@@ -68,7 +76,7 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     if (user) {
-      fetchApplications();
+      fetchApplications(!cached);
     }
   }, [user, statusFilter, sortBy, sortOrder, refreshTimestamp]);
 
@@ -95,7 +103,10 @@ export default function ApplicationsPage() {
             `Mencapai tahap ${newStatus}! +${json.gamification.amount} XP`
           );
         }
-        fetchApplications();
+        clearCache("apps_");
+        clearCache("pipeline_");
+        clearCache("dashboard_");
+        fetchApplications(true);
         if (selectedApp?.id === appId) {
           setSelectedApp(json.data?.application || null);
         }
@@ -111,7 +122,10 @@ export default function ApplicationsPage() {
         method: "DELETE",
       });
       if (res.ok) {
-        fetchApplications();
+        clearCache("apps_");
+        clearCache("pipeline_");
+        clearCache("dashboard_");
+        fetchApplications(true);
         setIsDrawerOpen(false);
       }
     } catch {
@@ -158,7 +172,7 @@ export default function ApplicationsPage() {
   ];
 
   return (
-    <AppLayout>
+    <>
       {isLoading ? (
         <WireframeSkeleton type="applications" />
       ) : (
@@ -308,6 +322,6 @@ export default function ApplicationsPage() {
           }
         }}
       />
-    </AppLayout>
+    </>
   );
 }

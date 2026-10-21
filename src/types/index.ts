@@ -23,6 +23,10 @@ export interface GamificationProfileDto {
   plantStageName?: string;
   nextLevelXp?: number;
   xpProgressInLevel?: number;
+  waterCountToday?: number;
+  maxWaterPerDay?: number;
+  remainingWater?: number;
+  canWater?: boolean;
 }
 
 export interface ApplicationEventDto {
@@ -102,6 +106,10 @@ export interface DashboardSummaryDto {
   totalXp: number;
   plantStageName: string;
   upcomingReminders: ReminderDto[];
+  waterCountToday?: number;
+  maxWaterPerDay?: number;
+  remainingWater?: number;
+  canWater?: boolean;
 }
 
 export interface ApiResponse<T> {
