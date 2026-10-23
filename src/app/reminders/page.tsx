@@ -10,22 +10,28 @@ import {
   Building,
   Trash2,
   Filter,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { useApp } from "@/components/layout/AppLayout";
 import { ReminderModal } from "@/components/reminders/ReminderModal";
+import { CalendarGrid } from "@/components/reminders/CalendarGrid";
 import { Button } from "@/components/ui/Button";
 import { ReminderDto, ApplicationDto } from "@/types";
 import { REMINDER_TYPE_META, ReminderTypeType } from "@/lib/constants";
 import { apiFetch } from "@/lib/api";
-import { getCached, setCached, clearCache } from "@/lib/cache";
+import { getCached, setCached } from "@/lib/cache";
 
 export default function RemindersPage() {
   const { user, triggerXpCelebration } = useApp();
-  const [filter, setFilter] = useState<"upcoming" | "completed" | "all">(
-    "upcoming"
-  );
+  // Default view is "grid" as requested ("yang kotak kotak")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  // Default filter to "all" so calendar shows complete schedule by default
+  const [filter, setFilter] = useState<"upcoming" | "completed" | "all">("all");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [modalInitialDate, setModalInitialDate] = useState<Date | null>(null);
 
   const cacheKey = `reminders_${filter}_${typeFilter}`;
   const cachedReminders = getCached<ReminderDto[]>(cacheKey);
@@ -84,7 +90,7 @@ export default function RemindersPage() {
         if (isCompleted) {
           triggerXpCelebration(5, "Kegiatan selesai! +5 XP");
         }
-        fetchReminders();
+        fetchReminders(false);
       }
     } catch {
       // ignore
@@ -97,10 +103,15 @@ export default function RemindersPage() {
       const res = await fetch(`/api/v1/reminders/${id}`, {
         method: "DELETE",
       });
-      if (res.ok) fetchReminders();
+      if (res.ok) fetchReminders(false);
     } catch {
       // ignore
     }
+  };
+
+  const handleOpenAddModal = (date?: Date) => {
+    setModalInitialDate(date || null);
+    setIsModalOpen(true);
   };
 
   return (
@@ -119,55 +130,98 @@ export default function RemindersPage() {
             </p>
           </div>
 
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            <Plus size={15} />
-            <span>Tambah Jadwal</span>
-          </Button>
+          <div className="flex items-center gap-2.5">
+            <Button
+              variant="primary"
+              onClick={() => handleOpenAddModal()}
+              className="w-full sm:w-auto"
+            >
+              <Plus size={15} />
+              <span>Tambah Jadwal</span>
+            </Button>
+          </div>
         </div>
 
-        {/* Filter Controls */}
-        <div className="p-4 rounded-3xl bg-[#F8FAF4] dark:bg-[#182019] border border-[#DEE7D0] dark:border-[#263328] shadow-2xs flex flex-wrap items-center justify-between gap-3 transition-colors">
-          {/* Status filter tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#EDF2E4] dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#263328]">
-            <button
-              onClick={() => setFilter("upcoming")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                filter === "upcoming"
-                  ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
-                  : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
-              }`}
-            >
-              Mendatang
-            </button>
-            <button
-              onClick={() => setFilter("completed")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                filter === "completed"
-                  ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
-                  : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
-              }`}
-            >
-              Selesai
-            </button>
-            <button
-              onClick={() => setFilter("all")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                filter === "all"
-                  ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
-                  : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
-              }`}
-            >
-              Semua
-            </button>
+        {/* Filter & View Switcher Bar */}
+        <div className="p-3.5 sm:p-4 rounded-3xl bg-[#F8FAF4] dark:bg-[#182019] border border-[#DEE7D0] dark:border-[#263328] shadow-2xs flex flex-wrap items-center justify-between gap-3 transition-colors">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* View Mode Toggle: Grid (Kalender) vs List (Daftar) */}
+            <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#EDF2E4] dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#263328]">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
+                    : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
+                }`}
+                title="Tampilan Kotak Kalender"
+              >
+                <LayoutGrid size={14} />
+                <span>Kalender</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
+                    : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
+                }`}
+                title="Tampilan Daftar List"
+              >
+                <List size={14} />
+                <span>Daftar</span>
+              </button>
+            </div>
+
+            {/* Status filter tabs */}
+            <div className="flex items-center gap-1 p-1 rounded-2xl bg-[#EDF2E4] dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#263328]">
+              <button
+                type="button"
+                onClick={() => setFilter("all")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  filter === "all"
+                    ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
+                    : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
+                }`}
+              >
+                Semua
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter("upcoming")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  filter === "upcoming"
+                    ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
+                    : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
+                }`}
+              >
+                Mendatang
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter("completed")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  filter === "completed"
+                    ? "bg-white dark:bg-[#1F2B20] text-[#788B4E] dark:text-[#9BC358] shadow-xs"
+                    : "text-[#616D64] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2]"
+                }`}
+              >
+                Selesai
+              </button>
+            </div>
           </div>
 
           {/* Type Filter */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#616D64] dark:text-[#A0B2A3] font-medium">Tipe:</span>
+            <span className="text-xs text-[#616D64] dark:text-[#A0B2A3] font-medium hidden xs:inline">
+              Tipe:
+            </span>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="text-xs font-semibold px-3 py-2 rounded-2xl border border-[#DEE7D0] dark:border-[#263328] bg-white dark:bg-[#131A14] text-[#242D22] dark:text-[#F1F6F2] focus:ring-2 focus:ring-[#788B4E]/30"
+              className="text-xs font-semibold px-3 py-2 rounded-2xl border border-[#DEE7D0] dark:border-[#263328] bg-white dark:bg-[#131A14] text-[#242D22] dark:text-[#F1F6F2] focus:ring-2 focus:ring-[#788B4E]/30 cursor-pointer"
             >
               <option value="ALL">Semua Tipe</option>
               <option value="INTERVIEW">Interview</option>
@@ -179,137 +233,163 @@ export default function RemindersPage() {
           </div>
         </div>
 
-        {/* Reminders List */}
-        <div className="space-y-3">
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-24 rounded-3xl bg-[#EEF3E2]/60 dark:bg-[#1E281F]/40 animate-pulse border border-[#DEE7D0]/60 dark:border-[#28382A]/40"
-                />
-              ))}
-            </div>
-          ) : reminders.length > 0 ? (
-            reminders.map((rem) => {
-              const isDone = Boolean(rem.completedAt);
-              const meta =
-                REMINDER_TYPE_META[rem.type as ReminderTypeType] ||
-                REMINDER_TYPE_META.OTHER;
+        {/* Main Content Area */}
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-24 rounded-3xl bg-[#EEF3E2]/60 dark:bg-[#1E281F]/40 animate-pulse border border-[#DEE7D0]/60 dark:border-[#28382A]/40"
+              />
+            ))}
+          </div>
+        ) : viewMode === "grid" ? (
+          /* Calendar Grid View (Default) */
+          <CalendarGrid
+            reminders={reminders}
+            selectedDate={selectedDate}
+            onSelectDate={(d) => setSelectedDate(d)}
+            onAddReminderOnDate={(d) => handleOpenAddModal(d)}
+            onToggleReminder={handleToggle}
+            onDeleteReminder={handleDelete}
+          />
+        ) : (
+          /* List View */
+          <div className="space-y-3">
+            {reminders.length > 0 ? (
+              reminders.map((rem) => {
+                const isDone = Boolean(rem.completedAt);
+                const meta =
+                  REMINDER_TYPE_META[rem.type as ReminderTypeType] ||
+                  REMINDER_TYPE_META.OTHER;
 
-              return (
-                <div
-                  key={rem.id}
-                  className={`p-4 sm:p-5 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${
-                    isDone
-                      ? "bg-[#F8FAF4]/80 dark:bg-[#182019]/60 border-[#DEE7D0] dark:border-[#263328] opacity-75"
-                      : "bg-white dark:bg-[#182019] border-[#DEE7D0] dark:border-[#263328] hover:border-[#788B4E] dark:hover:border-[#9BC358]"
-                  }`}
-                >
-                  <div className="flex items-start gap-3.5">
-                    <input
-                      type="checkbox"
-                      checked={isDone}
-                      onChange={(e) => handleToggle(rem.id, e.target.checked)}
-                      className="mt-1 rounded accent-[#788B4E] dark:accent-[#9BC358] w-5 h-5 cursor-pointer"
-                    />
+                return (
+                  <div
+                    key={rem.id}
+                    className={`p-4 sm:p-5 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${
+                      isDone
+                        ? "bg-[#F8FAF4]/80 dark:bg-[#182019]/60 border-[#DEE7D0] dark:border-[#263328] opacity-75"
+                        : "bg-white dark:bg-[#182019] border-[#DEE7D0] dark:border-[#263328] hover:border-[#788B4E] dark:hover:border-[#9BC358]"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <input
+                        type="checkbox"
+                        checked={isDone}
+                        onChange={(e) => handleToggle(rem.id, e.target.checked)}
+                        className="mt-1 rounded accent-[#788B4E] dark:accent-[#9BC358] w-5 h-5 cursor-pointer"
+                      />
 
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4
-                          className={`font-semibold text-sm sm:text-base ${
-                            isDone
-                              ? "line-through text-[#7A8E80] dark:text-[#58685C]"
-                              : "text-[#242D22] dark:text-[#F1F6F2]"
-                          }`}
-                        >
-                          {rem.title}
-                        </h4>
-                        <span
-                          className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${meta.color}`}
-                        >
-                          {meta.label}
-                        </span>
-                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4
+                            className={`font-semibold text-sm sm:text-base ${
+                              isDone
+                                ? "line-through text-[#7A8E80] dark:text-[#58685C]"
+                                : "text-[#242D22] dark:text-[#F1F6F2]"
+                            }`}
+                          >
+                            {rem.title}
+                          </h4>
+                          <span
+                            className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${meta.color}`}
+                          >
+                            {meta.label}
+                          </span>
+                        </div>
 
-                      {rem.application && (
-                        <p className="text-xs font-medium text-[#788B4E] dark:text-[#9BC358] mt-0.5 flex items-center gap-1.5">
-                          <span>{rem.application.company}</span>
-                          <span className="text-[#7A8E80] dark:text-[#58685C] font-light">/</span>
-                          <span>{rem.application.position}</span>
-                        </p>
-                      )}
+                        {rem.application && (
+                          <p className="text-xs font-medium text-[#788B4E] dark:text-[#9BC358] mt-0.5 flex items-center gap-1.5">
+                            <span>{rem.application.company}</span>
+                            <span className="text-[#7A8E80] dark:text-[#58685C] font-light">
+                              /
+                            </span>
+                            <span>{rem.application.position}</span>
+                          </p>
+                        )}
 
-                      <div className="flex items-center gap-2.5 text-xs text-[#616D64] dark:text-[#A0B2A3] mt-2">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
-                          {new Date(rem.dueAt).toLocaleDateString("id-ID", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </span>
-                        <span className="w-px h-3 bg-[#DEE7D0] dark:bg-[#28382A]" />
-                        <span className="flex items-center gap-1">
-                          <Clock size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
-                          {new Date(rem.dueAt).toLocaleTimeString("id-ID", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
+                        <div className="flex items-center gap-2.5 text-xs text-[#616D64] dark:text-[#A0B2A3] mt-2">
+                          <span className="flex items-center gap-1">
+                            <Calendar
+                              size={13}
+                              className="text-[#788B4E] dark:text-[#9BC358]"
+                            />
+                            {new Date(rem.dueAt).toLocaleDateString("id-ID", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span className="w-px h-3 bg-[#DEE7D0] dark:bg-[#28382A]" />
+                          <span className="flex items-center gap-1">
+                            <Clock
+                              size={13}
+                              className="text-[#788B4E] dark:text-[#9BC358]"
+                            />
+                            {new Date(rem.dueAt).toLocaleTimeString("id-ID", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}{" "}
+                            WIB
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-[#DEE7D0]/60 dark:border-[#263328]">
-                    {isDone ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#556534] dark:text-[#9BC358] bg-[#EDF2E4] dark:bg-[#1F2B20] px-2.5 py-1 rounded-full border border-[#DEE7D0] dark:border-[#28382A]">
-                        <CheckCircle2 size={13} />
-                        <span>Selesai</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#C2255C] dark:text-[#FA7194] bg-[#FFF0F3] dark:bg-[#2A141A] px-2.5 py-1 rounded-full border border-[#FDC4D0] dark:border-[#4B1E29]">
-                        <Clock size={13} />
-                        <span>Menunggu</span>
-                      </span>
-                    )}
+                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-0 border-[#DEE7D0]/60 dark:border-[#263328]">
+                      {isDone ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#556534] dark:text-[#9BC358] bg-[#EDF2E4] dark:bg-[#1F2B20] px-2.5 py-1 rounded-full border border-[#DEE7D0] dark:border-[#28382A]">
+                          <CheckCircle2 size={13} />
+                          <span>Selesai</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#C2255C] dark:text-[#FA7194] bg-[#FFF0F3] dark:bg-[#2A141A] px-2.5 py-1 rounded-full border border-[#FDC4D0] dark:border-[#4B1E29]">
+                          <Clock size={13} />
+                          <span>Menunggu</span>
+                        </span>
+                      )}
 
-                    <button
-                      onClick={() => handleDelete(rem.id)}
-                      className="p-1.5 rounded-xl text-[#7A8E80] hover:text-[#F45B88] hover:bg-[#FFF0F3] dark:hover:bg-[#2A141A] transition-colors cursor-pointer"
-                      title="Hapus reminder"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                      <button
+                        onClick={() => handleDelete(rem.id)}
+                        className="p-1.5 rounded-xl text-[#7A8E80] hover:text-[#F45B88] hover:bg-[#FFF0F3] dark:hover:bg-[#2A141A] transition-colors cursor-pointer"
+                        title="Hapus reminder"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
+                );
+              })
+            ) : (
+              <div className="p-12 text-center bg-[#F8FAF4] dark:bg-[#182019] rounded-3xl border border-[#DEE7D0] dark:border-[#263328]">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-[#EDF2E4] dark:bg-[#1F2B20] flex items-center justify-center text-[#788B4E] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A]">
+                  <CalendarCheck size={26} />
                 </div>
-              );
-            })
-          ) : (
-            <div className="p-12 text-center bg-[#F8FAF4] dark:bg-[#182019] rounded-3xl border border-[#DEE7D0] dark:border-[#263328]">
-              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-[#EDF2E4] dark:bg-[#1F2B20] flex items-center justify-center text-[#788B4E] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A]">
-                <CalendarCheck size={26} />
+                <h3 className="text-base font-bold text-[#242D22] dark:text-[#F1F6F2]">
+                  Tidak ada agenda yang ditemukan
+                </h3>
+                <p className="text-xs text-[#616D64] dark:text-[#A0B2A3] max-w-sm mx-auto mt-1">
+                  Jadwalkan interview, follow-up, atau tes teknis pertamamu untuk
+                  mendapatkan poin XP dan pengingat tepat waktu.
+                </p>
               </div>
-              <h3 className="text-base font-bold text-[#242D22] dark:text-[#F1F6F2]">
-                Tidak ada agenda yang ditemukan
-              </h3>
-              <p className="text-xs text-[#616D64] dark:text-[#A0B2A3] max-w-sm mx-auto mt-1">
-                Jadwalkan interview, follow-up, atau tes teknis pertamamu untuk
-                mendapatkan poin XP dan pengingat tepat waktu.
-              </p>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Reminder Modal */}
       <ReminderModal
         isOpen={isModalOpen}
         applications={applications}
-        onClose={() => setIsModalOpen(false)}
+        initialDate={modalInitialDate}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalInitialDate(null);
+        }}
         onSuccess={() => {
-          fetchReminders();
+          fetchReminders(false);
           triggerXpCelebration(5, "Jadwal berhasil ditambahkan!");
         }}
       />

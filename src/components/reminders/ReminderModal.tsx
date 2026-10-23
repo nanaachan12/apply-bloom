@@ -12,6 +12,7 @@ interface ReminderModalProps {
   onSuccess: () => void;
   applications: ApplicationDto[];
   preselectedAppId?: string;
+  initialDate?: Date | string | null;
 }
 
 export function ReminderModal({
@@ -20,6 +21,7 @@ export function ReminderModal({
   onSuccess,
   applications,
   preselectedAppId,
+  initialDate,
 }: ReminderModalProps) {
   const [appId, setAppId] = useState(preselectedAppId || "");
   const [title, setTitle] = useState("");
@@ -35,18 +37,28 @@ export function ReminderModal({
       setAppId(applications[0].id);
     }
 
-    // Default due date to tomorrow 10:00 AM
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(10, 0, 0, 0);
-    const tzOffset = tomorrow.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(tomorrow.getTime() - tzOffset)
-      .toISOString()
-      .slice(0, 16);
-    setDueAt(localISOTime);
-    setTitle("");
-    setError(null);
-  }, [isOpen, preselectedAppId, applications]);
+    if (isOpen) {
+      let targetDate: Date;
+      if (initialDate) {
+        targetDate = new Date(initialDate);
+        if (targetDate.getHours() === 0 && targetDate.getMinutes() === 0) {
+          targetDate.setHours(10, 0, 0, 0);
+        }
+      } else {
+        // Default due date to tomorrow 10:00 AM
+        targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 1);
+        targetDate.setHours(10, 0, 0, 0);
+      }
+      const tzOffset = targetDate.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(targetDate.getTime() - tzOffset)
+        .toISOString()
+        .slice(0, 16);
+      setDueAt(localISOTime);
+      setTitle("");
+      setError(null);
+    }
+  }, [isOpen, preselectedAppId, applications, initialDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
