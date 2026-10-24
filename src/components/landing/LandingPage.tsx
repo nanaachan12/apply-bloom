@@ -182,101 +182,98 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* 3. Floating Preview Fitur — 3 Mini-Cards Mengambang Pengganti Search Bar */}
+        {/* 3. Floating Preview Fitur — 3 Langkah Mudah Perkenalan ApplyBloom */}
         <div id="preview-fitur" className="relative z-20 max-w-4xl mx-auto -mt-6 sm:-mt-8 px-2 sm:px-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
-            {/* Mini Card 1: Application Tracker */}
+            {/* Step 1: Catat Lamaran */}
             <div
               onClick={onGuestClick}
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center sm:items-start gap-3"
+              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-start gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <KanbanSquare size={18} />
+              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs mt-0.5">
+                <KanbanSquare size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2] truncate">
-                    Application Tracker
-                  </h4>
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-extrabold text-[#556832] dark:text-[#9BC358]">
+                      Langkah 1
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/40 text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                      Drag & Drop
+                    </span>
+                  </div>
                   <span className="text-[10px] font-bold text-[#556832] dark:text-[#9BC358] sm:hidden">
                     Coba &rarr;
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                  <span className="px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/40 text-[10px] font-bold text-amber-800 dark:text-amber-300">
-                    Wishlist
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/40 text-[10px] font-bold text-purple-800 dark:text-purple-300">
-                    Interview
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
-                    Offer
-                  </span>
-                </div>
-                <p className="hidden sm:block text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1.5">
-                  Pantau alur seleksi real-time
+                <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2]">
+                  1. Catat Lamaran
+                </h4>
+                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
+                  Susun rapi semua lowongan impian di papan Kanban visual tanpa ribet buka Excel.
                 </p>
               </div>
             </div>
 
-            {/* Mini Card 2: Interview Reminder */}
+            {/* Step 2: Pasang Pengingat */}
             <div
               onClick={onGuestClick}
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center sm:items-start gap-3"
+              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-start gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <CalendarCheck size={18} />
+              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs mt-0.5">
+                <CalendarCheck size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2] truncate">
-                    Interview Reminder
-                  </h4>
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-extrabold text-[#556832] dark:text-[#9BC358]">
+                      Langkah 2
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/40 text-[10px] font-bold text-purple-800 dark:text-purple-300">
+                      Anti-Lupa
+                    </span>
+                  </div>
                   <span className="text-[10px] font-bold text-[#556832] dark:text-[#9BC358] sm:hidden">
                     Coba &rarr;
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-bold text-[#556832] dark:text-[#9BC358]">
-                    2 agenda mendatang
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 truncate">
-                  Traveloka & Midtrans (Test)
+                <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2]">
+                  2. Pasang Pengingat
+                </h4>
+                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
+                  Jangan sampai terlewat jadwal interview, FGD, atau batas waktu tes teknis.
                 </p>
               </div>
             </div>
 
-            {/* Mini Card 3: Your Progress */}
+            {/* Step 3: Tumbuh & Raih Offer */}
             <div
               onClick={onGuestClick}
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-center sm:items-start gap-3"
+              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-start gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <Flower2 size={18} />
+              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs mt-0.5">
+                <Flower2 size={19} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2] truncate">
-                    Your Progress
-                  </h4>
+                <div className="flex items-center justify-between gap-1 mb-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-extrabold text-[#556832] dark:text-[#9BC358]">
+                      Langkah 3
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+                      Level Up
+                    </span>
+                  </div>
                   <span className="text-[10px] font-bold text-[#556832] dark:text-[#9BC358] sm:hidden">
                     Coba &rarr;
                   </span>
                 </div>
-                <div className="flex items-center justify-between mt-1 text-[11px]">
-                  <span className="font-bold text-[#556832] dark:text-[#9BC358]">
-                    Level 2 Sprout
-                  </span>
-                  <span className="text-[10px] font-semibold text-[#5C6B5E] dark:text-[#A0B2A3]">
-                    85/100 XP
-                  </span>
-                </div>
-                <div className="w-full bg-[#DEE7D0] dark:bg-[#263528] h-1.5 rounded-full overflow-hidden mt-1">
-                  <div className="w-[85%] bg-gradient-to-r from-[#788B4E] to-[#556832] dark:from-[#9BC358] dark:to-[#698834] h-full rounded-full" />
-                </div>
-                <p className="text-[10px] text-[#7A8E80] dark:text-[#889C8C] mt-1 font-medium">
-                  Keep growing!
+                <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2]">
+                  3. Tumbuh & Raih Offer
+                </h4>
+                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
+                  Kumpulkan XP dari setiap progres, rawat kebun virtual, dan jemput karir impian.
                 </p>
               </div>
             </div>
