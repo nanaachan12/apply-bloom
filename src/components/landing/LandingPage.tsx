@@ -182,8 +182,8 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* 3. Floating Preview Fitur — Simpel & Minimalis */}
-        <div id="preview-fitur" className="relative z-20 max-w-4xl mx-auto -mt-6 sm:-mt-8 px-2 sm:px-4">
+        {/* 3. Floating Preview Fitur — Simpel & Minimalis (Hanya muncul di desktop/tablet, disembunyikan di HP) */}
+        <div id="preview-fitur" className="hidden sm:block relative z-20 max-w-4xl mx-auto -mt-6 sm:-mt-8 px-2 sm:px-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {/* Card 1: Catat Lamaran */}
             <div
