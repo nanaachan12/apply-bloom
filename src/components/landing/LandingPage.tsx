@@ -182,100 +182,70 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* 3. Floating Preview Fitur — 3 Langkah Mudah Perkenalan ApplyBloom */}
+        {/* 3. Floating Preview Fitur — Simpel & Minimalis */}
         <div id="preview-fitur" className="relative z-20 max-w-4xl mx-auto -mt-6 sm:-mt-8 px-2 sm:px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
-            {/* Step 1: Catat Lamaran */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            {/* Card 1: Catat Lamaran */}
             <div
               onClick={onGuestClick}
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-start gap-3"
+              className="p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#263528] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs mt-0.5">
-                <KanbanSquare size={19} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-1 mb-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-extrabold text-[#556832] dark:text-[#9BC358]">
-                      Langkah 1
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/40 text-[10px] font-bold text-amber-800 dark:text-amber-300">
-                      Drag & Drop
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#556832] dark:text-[#9BC358] sm:hidden">
-                    Coba &rarr;
-                  </span>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <KanbanSquare size={18} />
                 </div>
-                <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2]">
-                  1. Catat Lamaran
-                </h4>
-                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
-                  Susun rapi semua lowongan impian di papan Kanban visual tanpa ribet buka Excel.
-                </p>
+                <span className="text-[11px] font-semibold text-[#8D9B8E] dark:text-[#5E7060]">
+                  01
+                </span>
               </div>
+              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
+                Catat Lamaran
+              </h4>
+              <p className="text-xs text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
+                Atur seluruh lamaran di papan visual tanpa ribet menggunakan Excel.
+              </p>
             </div>
 
-            {/* Step 2: Pasang Pengingat */}
+            {/* Card 2: Pasang Pengingat */}
             <div
               onClick={onGuestClick}
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-start gap-3"
+              className="p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#263528] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs mt-0.5">
-                <CalendarCheck size={19} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-1 mb-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-extrabold text-[#556832] dark:text-[#9BC358]">
-                      Langkah 2
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/40 text-[10px] font-bold text-purple-800 dark:text-purple-300">
-                      Anti-Lupa
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#556832] dark:text-[#9BC358] sm:hidden">
-                    Coba &rarr;
-                  </span>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <CalendarCheck size={18} />
                 </div>
-                <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2]">
-                  2. Pasang Pengingat
-                </h4>
-                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
-                  Jangan sampai terlewat jadwal interview, FGD, atau batas waktu tes teknis.
-                </p>
+                <span className="text-[11px] font-semibold text-[#8D9B8E] dark:text-[#5E7060]">
+                  02
+                </span>
               </div>
+              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
+                Pasang Pengingat
+              </h4>
+              <p className="text-xs text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
+                Pengingat otomatis agar tidak ada sesi interview yang terlewat.
+              </p>
             </div>
 
-            {/* Step 3: Tumbuh & Raih Offer */}
+            {/* Card 3: Pantau Progres */}
             <div
               onClick={onGuestClick}
-              className="p-3.5 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#BED0A4]/80 dark:border-[#2C3E2F] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex items-start gap-3"
+              className="p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#263528] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs mt-0.5">
-                <Flower2 size={19} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-1 mb-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/15 text-[10px] font-extrabold text-[#556832] dark:text-[#9BC358]">
-                      Langkah 3
-                    </span>
-                    <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/40 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
-                      Level Up
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#556832] dark:text-[#9BC358] sm:hidden">
-                    Coba &rarr;
-                  </span>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Flower2 size={18} />
                 </div>
-                <h4 className="font-bold text-xs sm:text-sm text-[#242D22] dark:text-[#F1F6F2]">
-                  3. Tumbuh & Raih Offer
-                </h4>
-                <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
-                  Kumpulkan XP dari setiap progres, rawat kebun virtual, dan jemput karir impian.
-                </p>
+                <span className="text-[11px] font-semibold text-[#8D9B8E] dark:text-[#5E7060]">
+                  03
+                </span>
               </div>
+              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
+                Pantau Progres
+              </h4>
+              <p className="text-xs text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
+                Dapatkan poin XP dari setiap tahapan dan kembangkan kebun karirmu.
+              </p>
             </div>
           </div>
         </div>
