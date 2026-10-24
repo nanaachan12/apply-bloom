@@ -7,7 +7,6 @@ import {
   Users,
   Award,
   Clock,
-  Sparkles,
   Flame,
   ArrowRight,
   Plus,
@@ -29,6 +28,7 @@ import { DashboardSummaryDto, ApplicationDto, ReminderDto } from "@/types";
 import { apiFetch } from "@/lib/api";
 import { getCached, setCached, clearCache } from "@/lib/cache";
 import { BloomieMascot } from "@/components/mascot/BloomieMascot";
+import { LandingPage } from "@/components/landing/LandingPage";
 
 const HERO_BLOOMIE_GREETINGS = [
   "Halo! Selamat datang di ApplyBloom. Aku Bloomie, teman yang siap menemani perjalanan karirmu.",
@@ -36,7 +36,7 @@ const HERO_BLOOMIE_GREETINGS = [
   "Tetap semangat dan konsisten ya. Aku ada di sini untuk mendukung setiap proses lamaranmu.",
 ];
 
-export default function DashboardPage() {
+function AuthenticatedDashboard() {
   const {
     user,
     profile,
@@ -181,7 +181,6 @@ export default function DashboardPage() {
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
               <div className="max-w-xl">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 dark:bg-[#233125]/90 text-[#556832] dark:text-[#A8D063] border border-[#D5E0BF] dark:border-[#354837] mb-2.5 shadow-xs backdrop-blur-xs">
-                  <Sparkles size={12} className="text-[#788B4E] dark:text-[#9BC358]" />
                   <span>Career & Application Tracker</span>
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold text-[#242D22] dark:text-[#F1F6F2] font-heading drop-shadow-2xs">
@@ -578,4 +577,18 @@ export default function DashboardPage() {
       />
     </>
   );
+}
+
+export default function DashboardPage() {
+  const { user, isLoadingAuth } = useApp();
+
+  if (isLoadingAuth) {
+    return <WireframeSkeleton type="dashboard" />;
+  }
+
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  return <AuthenticatedDashboard />;
 }

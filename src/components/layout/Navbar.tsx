@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Menu,
   Flame,
-  Sparkles,
   LogOut,
   User as UserIcon,
   Plus,
@@ -93,9 +92,8 @@ export function Navbar({
         <Link
           href="/garden"
           title="Buka ringkasan Bloom Garden"
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] border border-[#D5E0BF] dark:border-[#2C3B2E] shadow-2xs hover:bg-[#E3ECCF] dark:hover:bg-[#263528] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] border border-[#D5E0BF] dark:border-[#2C3B2E] shadow-2xs hover:bg-[#E3ECCF] dark:hover:bg-[#263528] transition-colors"
         >
-          <Sparkles size={12} className="text-[#788B4E] dark:text-[#9BC358]" />
           <span>{profile?.totalXp ?? 0} XP</span>
         </Link>
 

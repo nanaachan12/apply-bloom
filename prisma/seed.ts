@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding ApplyBloom database...");
+  console.log("Seeding ApplyBloom database...");
 
   // 1. Seed Badges
   const badgesData = [
@@ -39,7 +39,7 @@ async function main() {
     {
       code: "offer-bloom",
       name: "Offer Bloom",
-      description: "Meraih surat penawaran kerja (Job Offer)! Selamat atas perjuanganmu! 🌸",
+      description: "Meraih surat penawaran kerja (Job Offer)! Selamat atas perjuanganmu!",
       icon: "Flower2",
       threshold: 1,
     },
@@ -52,22 +52,22 @@ async function main() {
       create: b,
     });
   }
-  console.log("✓ Badges seeded successfully");
+  console.log("Badges seeded successfully");
 
   // 2. Seed Demo User
   const salt = await bcrypt.genSalt(10);
   const passwordHash = await bcrypt.hash("Password123!", salt);
 
   const demoUser = await prisma.user.upsert({
-    where: { email: "bloom@applybloom.com" },
+    where: { email: "guest@applybloom.com" },
     update: {
-      name: "Rania Bloom",
+      name: "Guest",
       passwordHash,
       timezone: "Asia/Jakarta",
     },
     create: {
-      email: "bloom@applybloom.com",
-      name: "Rania Bloom",
+      email: "guest@applybloom.com",
+      name: "Guest",
       passwordHash,
       timezone: "Asia/Jakarta",
     },
@@ -207,7 +207,7 @@ async function main() {
         {
           fromStatus: "INTERVIEW",
           toStatus: "OFFER",
-          description: "Penawaran kerja resmi diterbitkan HRD Akseleran 🎉",
+          description: "Penawaran kerja resmi diterbitkan HRD Akseleran",
           occurredAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
         },
       ],
@@ -368,7 +368,7 @@ async function main() {
     });
   }
 
-  console.log("🌸 Seed complete! Demo account: bloom@applybloom.com / Password123!");
+  console.log("Seed complete! Guest account: guest@applybloom.com / Password123!");
 }
 
 main()

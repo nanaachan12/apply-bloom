@@ -399,9 +399,7 @@ export function CalendarGrid({
             <span>Lainnya</span>
           </div>
           <div className="flex items-center gap-1.5 sm:ml-auto">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#788B4E] text-white text-[9px] font-bold flex items-center justify-center">
-              ✓
-            </span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#788B4E] inline-block ring-2 ring-[#788B4E]/30" />
             <span>Hari Ini</span>
           </div>
         </div>

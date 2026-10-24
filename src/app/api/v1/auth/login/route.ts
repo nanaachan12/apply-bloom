@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     const token = signToken(tokenPayload);
 
     const response = NextResponse.json({
-      message: `Selamat datang kembali, ${user.name}! 🌿`,
+      message: `Selamat datang kembali, ${user.name}!`,
       data: {
         user: tokenPayload,
         profile: user.profile,

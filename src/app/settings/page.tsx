@@ -7,7 +7,7 @@ import {
   User,
   Clock,
   LogOut,
-  Sparkles,
+  Flower2,
   CheckCircle2,
   Lock,
   Eye,
@@ -174,7 +174,7 @@ export default function SettingsPage() {
         <div className="p-6 sm:p-7 rounded-3xl bg-[#F8FAF4] dark:bg-[#182019] border border-[#DEE7D0] dark:border-[#263328] shadow-xs transition-colors">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-[#242D22] dark:text-[#F1F6F2] flex items-center gap-2">
-              <Sparkles size={18} className="text-[#788B4E] dark:text-[#9BC358]" />
+              <Flower2 size={18} className="text-[#788B4E] dark:text-[#9BC358]" />
               <span>Tampilan & Maskot Bloomie</span>
             </h3>
             <span
@@ -238,7 +238,7 @@ export default function SettingsPage() {
                 triggerXpCelebration(
                   0,
                   !showBloomie
-                    ? "Bloomie kecil kembali aktif menemani layarmu! ✨"
+                    ? "Bloomie kecil kembali aktif menemani layarmu!"
                     : "Bloomie kecil disembunyikan."
                 );
               }}
@@ -258,7 +258,7 @@ export default function SettingsPage() {
 
           {/* Context tip */}
           <div className="mt-3.5 p-3 rounded-2xl bg-[#EEF3E2]/60 dark:bg-[#1E281F]/60 border border-[#DEE7D0]/60 dark:border-[#2C3B2E]/60 text-[11px] text-[#616D64] dark:text-[#A0B2A3] flex items-center gap-2">
-            <span className="shrink-0 text-base">🌱</span>
+            <Flower2 size={14} className="text-[#788B4E] dark:text-[#9BC358] shrink-0" />
             <span>
               Catatan: Meskipun Bloomie kecil disembunyikan, kamu tetap dapat berinteraksi dengan Bloomie utama di halaman <strong>Kebun Virtual (Bloom Garden)</strong>.
             </span>
@@ -278,8 +278,8 @@ export default function SettingsPage() {
 
           <div className="space-y-3 text-xs">
             <div className="p-3.5 rounded-2xl bg-white dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#232E25] flex items-start gap-3">
-              <div className="w-6 h-6 rounded-lg bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#2C3B2E] flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">
-                ✓
+              <div className="w-6 h-6 rounded-lg bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#2C3B2E] flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 size={13} />
               </div>
               <div>
                 <strong className="text-[#242D22] dark:text-[#F1F6F2] block mb-0.5">
@@ -292,8 +292,8 @@ export default function SettingsPage() {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-white dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#232E25] flex items-start gap-3">
-              <div className="w-6 h-6 rounded-lg bg-[#FFF0F3] dark:bg-[#2A141A] text-[#C2255C] dark:text-[#FA7194] border border-[#FDC4D0] dark:border-[#4D1D28] flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">
-                ✓
+              <div className="w-6 h-6 rounded-lg bg-[#FFF0F3] dark:bg-[#2A141A] text-[#C2255C] dark:text-[#FA7194] border border-[#FDC4D0] dark:border-[#4D1D28] flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 size={13} />
               </div>
               <div>
                 <strong className="text-[#242D22] dark:text-[#F1F6F2] block mb-0.5">
@@ -306,8 +306,8 @@ export default function SettingsPage() {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-white dark:bg-[#131A14] border border-[#DEE7D0] dark:border-[#232E25] flex items-start gap-3">
-              <div className="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5">
-                ✓
+              <div className="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 flex items-center justify-center shrink-0 mt-0.5">
+                <CheckCircle2 size={13} />
               </div>
               <div>
                 <strong className="text-[#242D22] dark:text-[#F1F6F2] block mb-0.5">

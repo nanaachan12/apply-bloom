@@ -5,7 +5,6 @@ import {
   ChevronRight,
   MapPin,
   Clock,
-  Sparkles,
   Building,
   ArrowRight,
   Plus,

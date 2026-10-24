@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import {
   Flower2,
-  Sparkles,
   Flame,
   Award,
   Clock,
@@ -103,10 +102,10 @@ export default function BloomGardenPage() {
       setIsBloomieSmiling(true);
       setBloomieMood("smile");
       const smileMessages = [
-        "Segar sekali! Terima kasih banyak sudah menyiram tanamanku hari ini! 🌱✨",
-        "Airnya sejuk! Tanamannya senang, Bloomie juga ikut tersenyum lebar! 💚",
-        "Yaaay! Tanaman kita makin subur! Terus konsisten melamar ya! 🌸",
-        "Makasih sudah disiram! Yuk rawat impian karirmu setiap hari! 🌿✨",
+        "Segar sekali! Terima kasih banyak sudah menyiram tanamanku hari ini!",
+        "Airnya sejuk! Tanamannya senang, Bloomie juga ikut tersenyum lebar!",
+        "Yaaay! Tanaman kita makin subur! Terus konsisten melamar ya!",
+        "Makasih sudah disiram! Yuk rawat impian karirmu setiap hari!",
       ];
       const randomMsg = smileMessages[Math.floor(Math.random() * smileMessages.length)];
       setBloomieSpeech(randomMsg);
@@ -169,7 +168,6 @@ export default function BloomGardenPage() {
               </span>
 
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EDF2E4] dark:bg-[#1E281F] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A]">
-                <Sparkles size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
                 <span>Total {currentXp} XP</span>
               </span>
             </div>
@@ -207,14 +205,13 @@ export default function BloomGardenPage() {
                 speechText={bloomieSpeech || undefined}
                 showBubble={true}
               />
-              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2] mt-2 flex items-center gap-1.5 justify-center">
+              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2] mt-2 flex items-center justify-center">
                 <span>Bloomie</span>
-                <span className="text-xs">🌱</span>
               </h4>
               <p className="text-[11px] text-[#616D64] dark:text-[#A0B2A3] mt-0.5 leading-relaxed max-w-[200px]">
                 {isBloomieSmiling
-                  ? "Bloomie tersenyum bahagia karena tanamannya sudah disiram! ✨"
-                  : "Ketuk Bloomie untuk sapaan, efek ceria, dan kata motivasi karir! ✨"}
+                  ? "Bloomie tersenyum bahagia karena tanamannya sudah disiram!"
+                  : "Ketuk Bloomie untuk sapaan, efek ceria, dan kata motivasi karir!"}
               </p>
             </div>
           </div>

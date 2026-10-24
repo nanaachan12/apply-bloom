@@ -12,6 +12,7 @@ import {
 import { ApplicationDto } from "@/types";
 
 import { apiFetch } from "@/lib/api";
+import { useApp } from "@/components/layout/AppLayout";
 
 interface ApplicationModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export function ApplicationModal({
   initialData,
   defaultStatus = "APPLIED",
 }: ApplicationModalProps) {
+  const { isGuest } = useApp();
   const isEditing = Boolean(initialData);
 
   const [company, setCompany] = useState("");
@@ -310,6 +312,12 @@ export function ApplicationModal({
             className="w-full px-3.5 py-2.5 rounded-2xl border border-[#DEE7D0] dark:border-[#263328] bg-white dark:bg-[#131A14] text-sm text-[#242D22] dark:text-[#F1F6F2] placeholder-[#7A8E80] focus:outline-hidden focus:ring-2 focus:ring-[#788B4E]/30 focus:border-[#788B4E] dark:focus:border-[#9BC358] transition-colors"
           />
         </div>
+
+        {isGuest && (
+          <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300 text-xs">
+            Mode Simulasi Tamu: Kamu dapat mencoba input data. Data ini bersifat simulasi sementara dan tidak disimpan permanen di akun pribadi.
+          </div>
+        )}
 
         <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#DEE7D0]/60 dark:border-[#263328]">
           <Button

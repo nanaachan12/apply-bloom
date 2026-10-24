@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Lamaran berhasil disimpan! +10 XP 🌿",
+        message: "Lamaran berhasil disimpan! +10 XP",
         data: application,
         gamification: xpResult,
       },

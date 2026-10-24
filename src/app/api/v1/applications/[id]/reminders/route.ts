@@ -69,7 +69,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        message: "Jadwal pengingat berhasil ditambahkan! ⏰",
+        message: "Jadwal pengingat berhasil ditambahkan!",
         data: reminder,
         gamification: gamificationResult,
       },

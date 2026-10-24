@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import confetti from "canvas-confetti";
-import { Sparkles, Droplets, Clock } from "lucide-react";
+import { Droplets, Clock } from "lucide-react";
 import { PLANT_STAGES } from "@/lib/constants";
 
 interface PlantVisualProps {
@@ -454,7 +454,6 @@ export function PlantVisual({
       {/* Stage Title & Info */}
       <div className="text-center mt-2 max-w-sm">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#EDF2E4] dark:bg-[#1E281F] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A] mb-1.5">
-          <Sparkles size={13} className="text-[#788B4E] dark:text-[#9BC358]" />
           <span className="px-1.5 py-0.5 rounded-md bg-[#788B4E]/15 dark:bg-[#9BC358]/20 font-bold text-[11px]">
             Level {level}
           </span>

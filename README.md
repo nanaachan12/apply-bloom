@@ -5,7 +5,7 @@
 
 ---
 
-## ✨ Fitur Utama
+## Fitur Utama
 
 - **Dashboard & Analitik Karir**: Pantau ringkasan total lamaran, tahapan interview, tawaran kerja (*Offers*), tren mingguan, dan status streak harian.
 - **My Applications**: Manajemen tabel dan kartu lamaran kerja lengkap dengan filter status, pencarian instan, dan pengurutan gaji/tanggal.
@@ -16,7 +16,7 @@
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **Framework**: Next.js 15 (App Router, React 19)
 - **Styling**: Tailwind CSS v4 & Vanilla CSS Tokens
@@ -26,7 +26,7 @@
 
 ---
 
-## 🛠️ Cara Menjalankan Secara Lokal
+## Cara Menjalankan Secara Lokal
 
 1. **Clone repository**:
    ```bash

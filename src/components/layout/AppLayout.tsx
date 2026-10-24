@@ -10,8 +10,8 @@ import {
   KanbanSquare,
   CalendarCheck,
   Flower2,
-  Sparkles,
   Zap,
+  Lock,
 } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
@@ -40,6 +40,11 @@ export interface AppContextType {
   refreshTimestamp: number;
   triggerRefresh: () => void;
   handleLogout: () => Promise<void>;
+  handleGuestLogin: () => Promise<boolean>;
+  openAuthModal: () => void;
+  isGuest: boolean;
+  resetGuestSimulation: () => Promise<boolean>;
+  isResettingSimulation: boolean;
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -57,6 +62,11 @@ export const AppContext = createContext<AppContextType>({
   refreshTimestamp: 0,
   triggerRefresh: () => {},
   handleLogout: async () => {},
+  handleGuestLogin: async () => false,
+  openAuthModal: () => {},
+  isGuest: false,
+  resetGuestSimulation: async () => false,
+  isResettingSimulation: false,
 });
 
 export const useApp = () => useContext(AppContext);
@@ -159,41 +169,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setProfile(json.data.profile);
         setIsAuthModalOpen(false);
       } else {
-        // If not logged in and user hasn't explicitly logged out, auto-login with Demo account
-        const wasExplicitlyLoggedOut =
-          typeof window !== "undefined" &&
-          localStorage.getItem("applybloom_logged_out") === "true";
-
-        if (!wasExplicitlyLoggedOut) {
-          const demoRes = await fetch("/api/v1/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: "bloom@applybloom.com",
-              password: "Password123!",
-            }),
-          });
-          if (demoRes.ok) {
-            const demoJson = await demoRes.json();
-            if (typeof window !== "undefined" && demoJson.data?.token) {
-              localStorage.setItem("applybloom_token", demoJson.data.token);
-            }
-            setUser(demoJson.data.user);
-            setProfile(demoJson.data.profile);
-            setIsAuthModalOpen(false);
-            return;
-          }
-        }
-
+        // Visitor is not logged in
         setUser(null);
         setProfile(null);
-        setIsAuthModalOpen(true);
+        setIsAuthModalOpen(false);
       }
     } catch (err) {
       console.error("fetchAuthUser error:", err);
       setUser(null);
       setProfile(null);
-      setIsAuthModalOpen(true);
+      setIsAuthModalOpen(false);
     } finally {
       setIsLoadingAuth(false);
     }
@@ -245,8 +230,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearCache();
     setUser(null);
     setProfile(null);
-    setIsAuthModalOpen(true);
-    router.push("/");
+    setIsAuthModalOpen(false);
+    window.location.href = "/";
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -302,32 +287,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const handleQuickDemoLogin = async () => {
+  const handleGuestLogin = async (): Promise<boolean> => {
     setIsSubmittingAuth(true);
     setAuthError(null);
     try {
-      const res = await fetch("/api/v1/auth/login", {
+      const res = await fetch("/api/v1/auth/guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: "bloom@applybloom.com",
-          password: "Password123!",
-        }),
       });
-
-      let json: any = null;
-      try {
-        json = await res.json();
-      } catch {
-        json = null;
-      }
-
+      const json = await res.json();
       if (!res.ok) {
         throw new Error(
           json?.error ||
             (res.status >= 500
               ? "Koneksi database terputus. Pastikan MySQL sudah menyala di Laragon/XAMPP."
-              : "Gagal masuk dengan akun demo")
+              : "Gagal masuk sebagai Guest")
         );
       }
 
@@ -338,14 +312,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("applybloom_logged_out");
       }
 
-      await fetchAuthUser();
+      setUser(json.data.user);
+      setProfile(json.data.profile);
       setIsAuthModalOpen(false);
-      triggerXpCelebration(15, "Masuk sebagai akun Demo Rania Bloom");
+      triggerXpCelebration(15, "Masuk sebagai akun Guest");
       triggerRefresh();
+      return true;
     } catch (err: any) {
-      setAuthError(err.message || "Gagal login demo");
+      setAuthError(err.message || "Gagal login guest");
+      return false;
     } finally {
       setIsSubmittingAuth(false);
+    }
+  };
+
+  const handleQuickDemoLogin = async () => {
+    await handleGuestLogin();
+  };
+
+  const isGuest = Boolean(user && user.email === "guest@applybloom.com");
+  const [isResettingSimulation, setIsResettingSimulation] = useState(false);
+
+  const resetGuestSimulation = async (): Promise<boolean> => {
+    try {
+      setIsResettingSimulation(true);
+      await apiFetch("/api/v1/guest/reset", { method: "POST" });
+      triggerRefresh();
+      await refreshProfile();
+      setXpToast({
+        amount: 0,
+        message: "Data simulasi tamu berhasil dikembalikan ke kondisi awal.",
+      });
+      return true;
+    } catch (err: any) {
+      console.error(err);
+      return false;
+    } finally {
+      setIsResettingSimulation(false);
     }
   };
 
@@ -366,6 +369,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         refreshTimestamp,
         triggerRefresh,
         handleLogout,
+        handleGuestLogin,
+        openAuthModal: () => setIsAuthModalOpen(true),
+        isGuest,
+        resetGuestSimulation,
+        isResettingSimulation,
       }}
     >
       {children}
@@ -374,7 +382,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       {xpToast && (
         <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-white dark:bg-[#1B231C] border border-[#DEE7D0] dark:border-[#2C3B2E] shadow-lg rounded-2xl p-4 flex items-center gap-3 animate-in slide-in-from-bottom duration-200 text-[#242D22] dark:text-[#F1F6F2]">
           <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#233125] text-[#788B4E] dark:text-[#9BC358] flex items-center justify-center text-sm shadow-2xs">
-            <Sparkles size={16} />
+            <Flower2 size={16} />
           </div>
           <div>
             <p className="font-bold text-xs text-[#2D5A43]">
@@ -392,7 +400,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={() => {
-          triggerXpCelebration(10, "Lamaran baru berhasil ditambahkan! +10 XP");
+          if (isGuest) {
+            triggerXpCelebration(
+              10,
+              "Simulasi: Lamaran berhasil diuji coba. Catatan: Data sementara ini tidak disimpan permanen."
+            );
+          } else {
+            triggerXpCelebration(10, "Lamaran baru berhasil ditambahkan! +10 XP");
+          }
           triggerRefresh();
           refreshProfile();
           router.refresh();
@@ -424,11 +439,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               variant="primary"
               size="sm"
               className="w-full font-bold flex items-center justify-center gap-2"
-              onClick={handleQuickDemoLogin}
+              onClick={handleGuestLogin}
               isLoading={isSubmittingAuth}
             >
-              <Zap size={14} className="text-amber-300" />
-              <span>Masuk Instan sebagai Demo User</span>
+              <Zap size={14} />
+              <span>Masuk sebagai Guest (1-Klik)</span>
             </Button>
           </div>
 
@@ -522,9 +537,75 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile, isLoadingAuth, openAddModal, handleLogout, showBloomie } = useApp();
+  const {
+    user,
+    profile,
+    isLoadingAuth,
+    openAddModal,
+    handleLogout,
+    showBloomie,
+    handleGuestLogin,
+    isGuest,
+    resetGuestSimulation,
+    isResettingSimulation,
+  } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+
+  const isPublicPage =
+    pathname === "/login" || pathname === "/register" || (!user && pathname === "/");
+
+  // If public page (Landing, Login, Register), render cleanly without app shell
+  if (isPublicPage) {
+    return (
+      <div className="min-h-screen bg-[#F4F7EF] dark:bg-[#0C100D] text-[#242D22] dark:text-[#F1F6F2] transition-colors duration-200">
+        {children}
+      </div>
+    );
+  }
+
+  // If visitor attempts to access internal app pages without being logged in
+  if (!user && !isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-[#F4F7EF] dark:bg-[#0C100D] text-[#242D22] dark:text-[#F1F6F2] flex items-center justify-center p-4">
+        <div className="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#263328] shadow-xl text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#788B4E] dark:text-[#9BC358] flex items-center justify-center mx-auto">
+            <Lock size={22} />
+          </div>
+          <h2 className="text-lg font-bold font-heading text-[#242D22] dark:text-[#F1F6F2]">
+            Akses Memerlukan Login
+          </h2>
+          <p className="text-xs text-[#616D64] dark:text-[#A0B2A3]">
+            Silakan masuk terlebih dahulu untuk mengakses menu ini, atau gunakan Mode Guest
+            untuk mencoba fitur secara instan.
+          </p>
+          <div className="space-y-2 pt-2">
+            <Button
+              variant="primary"
+              className="w-full"
+              onClick={async () => {
+                await handleGuestLogin();
+              }}
+            >
+              <span>Masuk sebagai Guest (1-Klik)</span>
+            </Button>
+            <div className="flex items-center justify-center gap-3 pt-2 text-xs">
+              <Link
+                href="/login"
+                className="font-semibold text-[#788B4E] dark:text-[#9BC358] hover:underline"
+              >
+                Halaman Login
+              </Link>
+              <span className="text-[#DEE7D0] dark:text-[#263328]">•</span>
+              <Link href="/" className="text-[#616D64] dark:text-[#A0B2A3] hover:underline">
+                Kembali ke Beranda
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const getSkeletonType = () => {
     if (pathname === "/") return "dashboard";
@@ -555,6 +636,47 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         />
 
         <main className="flex-1 p-3 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto pb-24 lg:pb-8">
+          {/* Guest Simulation Sticky Mode Top Banner */}
+          {isGuest && !isLoadingAuth && (
+            <div className="mb-5 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-[#EEF3E2] dark:bg-[#18231A] border border-[#BED0A4] dark:border-[#2C3E2E] shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-xl bg-[#556832] dark:bg-[#788B4E] text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <Flower2 size={16} />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-[#242D22] dark:text-[#F1F6F2]">
+                      Mode Simulasi Tamu
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#556832]/15 dark:bg-[#9BC358]/20 text-[#556832] dark:text-[#9BC358]">
+                      Hanya Simulasi
+                    </span>
+                  </div>
+                  <p className="text-[#5C6B5E] dark:text-[#A0B2A3] leading-relaxed">
+                    Kamu bebas mencoba input data lamaran untuk simulasi. Data ini bersifat sementara dan tidak disimpan secara permanen. Silakan daftar akun untuk menyimpan lamaranmu!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                <button
+                  onClick={resetGuestSimulation}
+                  disabled={isResettingSimulation}
+                  className="px-3.5 py-2 rounded-xl border border-[#BED0A4] dark:border-[#2C3E2E] bg-white dark:bg-[#141A15] text-[#242D22] dark:text-[#F1F6F2] hover:bg-[#F4F7EF] dark:hover:bg-[#1E281F] text-xs font-semibold transition-colors cursor-pointer disabled:opacity-60"
+                  title="Kembalikan data demo ke kondisi rapi awal"
+                >
+                  {isResettingSimulation ? "Mereset..." : "Reset Data Demo"}
+                </button>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-xl bg-[#556832] hover:bg-[#435327] dark:bg-[#788B4E] dark:hover:bg-[#687a41] text-white text-xs font-bold transition-all shadow-2xs"
+                >
+                  Daftar Akun Permanen
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] rounded-3xl sm:rounded-[2.2rem] shadow-xs p-4 sm:p-7 min-h-[calc(100vh-6.5rem)] transition-colors duration-200">
             {isLoadingAuth ? (
               <WireframeSkeleton type={getSkeletonType()} />

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { KanbanSquare, Plus, Sparkles } from "lucide-react";
+import { KanbanSquare, Plus } from "lucide-react";
 import { useApp } from "@/components/layout/AppLayout";
 import { PipelineBoard } from "@/components/applications/PipelineBoard";
 import { ApplicationDetailDrawer } from "@/components/applications/ApplicationDetailDrawer";
