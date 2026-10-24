@@ -570,7 +570,6 @@ export function LandingPage() {
             <span className="font-bold text-[#242D22] dark:text-[#F1F6F2]">
               ApplyBloom
             </span>
-            <span>— Career Tracker & Growth</span>
           </div>
           <p className="text-[11px]">
             Mode Tamu disediakan untuk simulasi fitur. Data tersimpan permanen setelah pendaftaran.

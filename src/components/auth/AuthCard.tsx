@@ -382,10 +382,6 @@ export function AuthCard({ initialMode }: AuthCardProps) {
         </div>
       </main>
 
-      {/* Footer Note */}
-      <footer className="max-w-md w-full mx-auto text-center text-xs text-[#7A8E80] dark:text-[#526356] py-2">
-        ApplyBloom — Career Tracker & Growth
-      </footer>
     </div>
   );
 }
