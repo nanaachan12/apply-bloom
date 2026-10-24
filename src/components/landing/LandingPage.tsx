@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   Lock,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { useApp } from "@/components/layout/AppLayout";
 import { BloomieThrowable } from "@/components/mascot/BloomieThrowable";
@@ -24,6 +26,7 @@ export function LandingPage() {
   const [isLoggingInGuest, setIsLoggingInGuest] = useState(false);
   const [guestError, setGuestError] = useState<string | null>(null);
   const [activeTabDot, setActiveTabDot] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const onGuestClick = async () => {
     try {
@@ -42,85 +45,166 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#F4F7EF] dark:bg-[#0C100D] text-[#242D22] dark:text-[#F1F6F2] transition-colors duration-200 pb-16">
-      {/* 1. Floating Pill Top Navbar */}
-      <header className="sticky top-4 z-40 max-w-5xl mx-auto px-4">
-        <div className="rounded-full bg-white/90 dark:bg-[#141A15]/90 backdrop-blur-md border border-[#DEE7D0] dark:border-[#232E25] shadow-xs px-5 py-2.5 flex items-center justify-between transition-colors">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#788B4E] to-[#556832] dark:from-[#9BC358] dark:to-[#698834] flex items-center justify-center text-white dark:text-[#0C100D] shadow-2xs group-hover:scale-105 transition-transform">
-              <Flower2 size={18} />
+      {/* 1. Floating Pill Top Navbar with Mobile Hamburger Menu */}
+      <header className="sticky top-3 sm:top-5 z-40 max-w-5xl mx-auto px-3 sm:px-4">
+        <div className="rounded-2xl sm:rounded-full bg-white/95 dark:bg-[#141A15]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#232E25] shadow-sm px-4 sm:px-5 py-2 sm:py-2.5 transition-all">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#788B4E] to-[#556832] dark:from-[#9BC358] dark:to-[#698834] flex items-center justify-center text-white dark:text-[#0C100D] shadow-2xs group-hover:scale-105 transition-transform">
+                <Flower2 size={18} />
+              </div>
+              <span className="font-heading font-extrabold text-base tracking-tight text-[#2D4526] dark:text-[#E2ECD5]">
+                ApplyBloom
+              </span>
+            </Link>
+
+            {/* Desktop Nav Links */}
+            <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-[#57645A] dark:text-[#A0B2A3]">
+              <a
+                href="#hero"
+                className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
+              >
+                Beranda
+              </a>
+              <a
+                href="#preview-fitur"
+                className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
+              >
+                Fitur Preview
+              </a>
+              <a
+                href="#mengapa-kami"
+                className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
+              >
+                Tentang
+              </a>
+              <a
+                href="#bloomie-interaktif"
+                className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
+              >
+                Teman Bloomie
+              </a>
+            </nav>
+
+            {/* Action Buttons & Hamburger Menu */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full text-[#57645A] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2] hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors cursor-pointer"
+                title={theme === "light" ? "Ganti ke Tema Gelap" : "Ganti ke Tema Terang"}
+                aria-label="Ganti Tema"
+              >
+                {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
+              </button>
+
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex px-3.5 py-1.5 text-xs font-semibold text-[#2D4526] dark:text-[#E2ECD5] hover:text-[#556832] transition-colors"
+              >
+                Masuk
+              </Link>
+
+              <Link
+                href="/register"
+                className="hidden sm:inline-flex px-4 py-1.5 rounded-full border border-[#BED0A4] dark:border-[#2C3E2E] bg-[#EEF3E2]/60 dark:bg-[#19221B] hover:bg-[#E2ECD5] dark:hover:bg-[#202C23] text-xs font-semibold text-[#2D4526] dark:text-[#E2ECD5] transition-colors"
+              >
+                Daftar Akun
+              </Link>
+
+              <button
+                onClick={onGuestClick}
+                disabled={isLoggingInGuest}
+                className="hidden sm:inline-flex rounded-full bg-[#556832] hover:bg-[#435327] dark:bg-[#788B4E] dark:hover:bg-[#687a41] text-white px-4 py-1.5 text-xs font-bold shadow-2xs hover:shadow-xs transition-all items-center gap-1.5 cursor-pointer disabled:opacity-60"
+              >
+                <span>{isLoggingInGuest ? "Memuat..." : "Simulasi Guest"}</span>
+              </button>
+
+              {/* Hamburger Button for Mobile */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-xl text-[#2D4526] dark:text-[#E2ECD5] hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors cursor-pointer"
+                aria-label={mobileMenuOpen ? "Tutup Menu" : "Buka Menu"}
+                title={mobileMenuOpen ? "Tutup Menu" : "Buka Menu"}
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
-            <span className="font-heading font-extrabold text-base tracking-tight text-[#2D4526] dark:text-[#E2ECD5]">
-              ApplyBloom
-            </span>
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-[#57645A] dark:text-[#A0B2A3]">
-            <a
-              href="#hero"
-              className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
-            >
-              Beranda
-            </a>
-            <a
-              href="#preview-fitur"
-              className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
-            >
-              Fitur Preview
-            </a>
-            <a
-              href="#mengapa-kami"
-              className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
-            >
-              Tentang
-            </a>
-            <a
-              href="#bloomie-interaktif"
-              className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
-            >
-              Teman Bloomie
-            </a>
-          </nav>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full text-[#57645A] dark:text-[#A0B2A3] hover:text-[#242D22] dark:hover:text-[#F1F6F2] hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors cursor-pointer"
-              title={theme === "light" ? "Ganti ke Tema Gelap" : "Ganti ke Tema Terang"}
-              aria-label="Ganti Tema"
-            >
-              {theme === "light" ? <Moon size={15} /> : <Sun size={15} />}
-            </button>
-
-            <Link
-              href="/login"
-              className="hidden sm:inline-flex px-3.5 py-1.5 text-xs font-semibold text-[#2D4526] dark:text-[#E2ECD5] hover:text-[#556832] transition-colors"
-            >
-              Masuk
-            </Link>
-
-            <Link
-              href="/register"
-              className="hidden sm:inline-flex px-4 py-1.5 rounded-full border border-[#BED0A4] dark:border-[#2C3E2E] bg-[#EEF3E2]/60 dark:bg-[#19221B] hover:bg-[#E2ECD5] dark:hover:bg-[#202C23] text-xs font-semibold text-[#2D4526] dark:text-[#E2ECD5] transition-colors"
-            >
-              Daftar Akun
-            </Link>
-
-            <button
-              onClick={onGuestClick}
-              disabled={isLoggingInGuest}
-              className="rounded-full bg-[#556832] hover:bg-[#435327] dark:bg-[#788B4E] dark:hover:bg-[#687a41] text-white px-4 py-1.5 text-xs font-bold shadow-2xs hover:shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
-            >
-              <span>{isLoggingInGuest ? "Memuat..." : "Simulasi Guest"}</span>
-            </button>
           </div>
+
+          {/* Mobile Dropdown Menu Drawer */}
+          {mobileMenuOpen && (
+            <div className="md:hidden pt-3 pb-2 border-t border-[#DEE7D0] dark:border-[#232E25] mt-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+              <nav className="flex flex-col space-y-1 text-xs font-semibold text-[#48564B] dark:text-[#C5D6C7]">
+                <a
+                  href="#hero"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
+                >
+                  Beranda
+                </a>
+                <a
+                  href="#preview-fitur"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
+                >
+                  Fitur Utama
+                </a>
+                <a
+                  href="#mengapa-kami"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
+                >
+                  Tentang ApplyBloom
+                </a>
+                <a
+                  href="#bloomie-interaktif"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
+                >
+                  Maskot Bloomie
+                </a>
+              </nav>
+
+              <div className="pt-3 mt-2 border-t border-[#DEE7D0] dark:border-[#232E25] flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onGuestClick();
+                  }}
+                  disabled={isLoggingInGuest}
+                  className="w-full rounded-xl bg-[#556832] hover:bg-[#435327] text-white py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <Flower2 size={14} />
+                  <span>{isLoggingInGuest ? "Membuka Simulasi..." : "Coba Mode Simulasi (Guest)"}</span>
+                </button>
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2 text-xs font-bold text-[#2D4526] dark:text-[#E2ECD5] border border-[#DEE7D0] dark:border-[#2C3E2E] rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
+                  >
+                    Masuk
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-center py-2 text-xs font-bold text-white bg-[#3B5023] hover:bg-[#2F411C] rounded-xl transition-colors"
+                  >
+                    Daftar Akun
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
       {/* 2. Hero Section: Rounded Scenic Card Container with landingpage.png background */}
-      <section id="hero" className="max-w-5xl mx-auto px-4 pt-4 sm:pt-6">
+      <section id="hero" className="max-w-5xl mx-auto px-3 sm:px-4 mt-3 sm:mt-6 pt-1 sm:pt-2">
         <div className="relative rounded-[2.2rem] sm:rounded-[2.8rem] overflow-hidden min-h-[460px] sm:min-h-[520px] flex flex-col justify-between p-6 sm:p-12 border border-[#DEE7D0] dark:border-[#232E25] shadow-lg bg-[#FAF6EE] dark:bg-[#141A15]">
           {/* Official ApplyBloom landingpage.png Illustration Background */}
           <div
