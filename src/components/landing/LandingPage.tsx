@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Briefcase,
   KanbanSquare,
   CalendarCheck,
   Flower2,
@@ -12,7 +11,6 @@ import {
   Sun,
   Moon,
   CheckCircle2,
-  Lock,
   ChevronRight,
   Menu,
   X,
@@ -25,7 +23,6 @@ export function LandingPage() {
   const { theme, toggleTheme, handleGuestLogin } = useApp();
   const [isLoggingInGuest, setIsLoggingInGuest] = useState(false);
   const [guestError, setGuestError] = useState<string | null>(null);
-  const [activeTabDot, setActiveTabDot] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const onGuestClick = async () => {
@@ -68,16 +65,16 @@ export function LandingPage() {
                 Beranda
               </a>
               <a
-                href="#preview-fitur"
-                className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
-              >
-                Fitur Preview
-              </a>
-              <a
                 href="#mengapa-kami"
                 className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
               >
                 Tentang
+              </a>
+              <a
+                href="#fitur"
+                className="hover:text-[#2D4526] dark:hover:text-[#F1F6F2] transition-colors"
+              >
+                Fitur Unggulan
               </a>
               <a
                 href="#bloomie-interaktif"
@@ -145,18 +142,18 @@ export function LandingPage() {
                   Beranda
                 </a>
                 <a
-                  href="#preview-fitur"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
-                >
-                  Fitur Utama
-                </a>
-                <a
                   href="#mengapa-kami"
                   onClick={() => setMobileMenuOpen(false)}
                   className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
                 >
                   Tentang ApplyBloom
+                </a>
+                <a
+                  href="#fitur"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-2 rounded-xl hover:bg-[#EEF3E2] dark:hover:bg-[#1E281F] transition-colors"
+                >
+                  Fitur Utama
                 </a>
                 <a
                   href="#bloomie-interaktif"
@@ -266,109 +263,20 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* 3. Floating Preview Fitur — Simpel & Minimalis (Hanya muncul di desktop/tablet, disembunyikan di HP) */}
-        <div id="preview-fitur" className="hidden sm:block relative z-20 max-w-4xl mx-auto -mt-6 sm:-mt-8 px-2 sm:px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            {/* Card 1: Catat Lamaran */}
-            <div
-              onClick={onGuestClick}
-              className="p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#263528] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
-            >
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <KanbanSquare size={18} />
-                </div>
-                <span className="text-[11px] font-semibold text-[#8D9B8E] dark:text-[#5E7060]">
-                  01
-                </span>
-              </div>
-              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
-                Catat Lamaran
-              </h4>
-              <p className="text-xs text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
-                Atur seluruh lamaran di papan visual tanpa ribet menggunakan Excel.
-              </p>
-            </div>
-
-            {/* Card 2: Pasang Pengingat */}
-            <div
-              onClick={onGuestClick}
-              className="p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#263528] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
-            >
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <CalendarCheck size={18} />
-                </div>
-                <span className="text-[11px] font-semibold text-[#8D9B8E] dark:text-[#5E7060]">
-                  02
-                </span>
-              </div>
-              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
-                Pasang Pengingat
-              </h4>
-              <p className="text-xs text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
-                Pengingat otomatis agar tidak ada sesi interview yang terlewat.
-              </p>
-            </div>
-
-            {/* Card 3: Pantau Progres */}
-            <div
-              onClick={onGuestClick}
-              className="p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#151D16]/95 backdrop-blur-md border border-[#DEE7D0] dark:border-[#263528] shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
-            >
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#EEF3E2] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <Flower2 size={18} />
-                </div>
-                <span className="text-[11px] font-semibold text-[#8D9B8E] dark:text-[#5E7060]">
-                  03
-                </span>
-              </div>
-              <h4 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
-                Pantau Progres
-              </h4>
-              <p className="text-xs text-[#5C6B5E] dark:text-[#A0B2A3] mt-1 leading-relaxed">
-                Dapatkan poin XP dari setiap tahapan dan kembangkan kebun karirmu.
-              </p>
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* 4. Section 2: Two-Column Showcase ("Kenapa Memilih ApplyBloom?") */}
+      {/* 3. Section 2: Two-Column Showcase ("Kenapa Memilih ApplyBloom?") */}
       <section id="mengapa-kami" className="max-w-5xl mx-auto px-4 py-16 sm:py-24">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left Column: Visual Card with Overlapping Circular Badges */}
+          {/* Left Column: Clean Visual Workspace Showcase */}
           <div className="md:col-span-6 relative">
-            <div className="relative rounded-3xl sm:rounded-[2.5rem] overflow-hidden border border-[#DEE7D0] dark:border-[#232E25] shadow-md bg-white dark:bg-[#141A15]">
-              <div className="relative h-64 sm:h-80 w-full overflow-hidden">
+            <div className="relative rounded-3xl sm:rounded-[2.5rem] overflow-hidden border border-[#DEE7D0] dark:border-[#232E25] shadow-lg bg-white dark:bg-[#141A15]">
+              <div className="relative h-64 sm:h-96 w-full overflow-hidden">
                 <img
                   src="/images/showcase_preview.jpg"
                   alt="ApplyBloom Workspace Showcase"
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
-                {/* Live simulation banner inside visual */}
-                <div className="absolute bottom-4 left-4 right-4 p-3 rounded-2xl bg-white/90 dark:bg-[#151E17]/90 backdrop-blur-md border border-white/40 dark:border-white/10 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-[#242D22] dark:text-[#F1F6F2]">
-                      Workspace Terintegrasi
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#788B4E]/15 text-[#556832] dark:text-[#9BC358]">
-                      Mode Tamu Siap Pakai
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#5C6B5E] dark:text-[#A0B2A3] mt-1">
-                    Traveloka (Interview) • Midtrans (Assessment) • Akseleran (Offer)
-                  </p>
-                </div>
-              </div>
-
-              {/* Floating Circular Badge 1 (Top-Left) */}
-              <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-[#556832] dark:bg-[#788B4E] text-white flex flex-col items-center justify-center shadow-lg border-2 border-white dark:border-[#141A15]">
-                <Flower2 size={16} />
-                <span className="text-[8px] font-bold uppercase tracking-wider">Mulai</span>
               </div>
             </div>
           </div>
@@ -470,21 +378,24 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 3 Rounded Feature Cards */}
+        {/* 3 Clean Rounded Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1: Kanban Board */}
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between p-4 group">
-            <div className="relative h-44 rounded-2xl overflow-hidden mb-4">
+          <div
+            onClick={onGuestClick}
+            className="rounded-3xl overflow-hidden bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col p-4 group cursor-pointer"
+          >
+            <div className="relative h-48 rounded-2xl overflow-hidden mb-4">
               <img
                 src="/images/showcase_preview.jpg"
                 alt="Papan Kanban Pelacak Lamaran"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3 p-2 rounded-xl bg-white/80 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358]">
-                <KanbanSquare size={16} />
+              <div className="absolute top-3 left-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358] shadow-xs">
+                <KanbanSquare size={17} />
               </div>
             </div>
-            <div className="space-y-2 flex-1">
+            <div className="space-y-1.5 flex-1 px-1 pb-1">
               <h3 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
                 Papan Kanban Visual
               </h3>
@@ -492,29 +403,24 @@ export function LandingPage() {
                 Kelompokkan lamaran ke tahap Wishlist, Applied, Assessment, Interview, hingga Offer dengan status dinamis.
               </p>
             </div>
-            <div className="pt-4">
-              <button
-                onClick={onGuestClick}
-                className="w-full rounded-full bg-[#EEF3E2] dark:bg-[#1F2B20] hover:bg-[#556832] hover:text-white dark:hover:bg-[#788B4E] text-[#556832] dark:text-[#E2ECD5] py-2 text-xs font-bold transition-colors cursor-pointer"
-              >
-                Jelajahi Kanban
-              </button>
-            </div>
           </div>
 
           {/* Card 2: Kalender Agenda */}
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between p-4 group">
-            <div className="relative h-44 rounded-2xl overflow-hidden mb-4">
+          <div
+            onClick={onGuestClick}
+            className="rounded-3xl overflow-hidden bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col p-4 group cursor-pointer"
+          >
+            <div className="relative h-48 rounded-2xl overflow-hidden mb-4">
               <img
                 src="/images/feature_preview.jpg"
                 alt="Kalender Agenda Pintar"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3 p-2 rounded-xl bg-white/80 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358]">
-                <CalendarCheck size={16} />
+              <div className="absolute top-3 left-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358] shadow-xs">
+                <CalendarCheck size={17} />
               </div>
             </div>
-            <div className="space-y-2 flex-1">
+            <div className="space-y-1.5 flex-1 px-1 pb-1">
               <h3 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
                 Kalender Agenda Pintar
               </h3>
@@ -522,29 +428,24 @@ export function LandingPage() {
                 Tampilan grid bulanan dengan penanda hari ini serta jadwal interview kerja, batas pengumpulan tugas, dan reminder.
               </p>
             </div>
-            <div className="pt-4">
-              <button
-                onClick={onGuestClick}
-                className="w-full rounded-full bg-[#EEF3E2] dark:bg-[#1F2B20] hover:bg-[#556832] hover:text-white dark:hover:bg-[#788B4E] text-[#556832] dark:text-[#E2ECD5] py-2 text-xs font-bold transition-colors cursor-pointer"
-              >
-                Buka Kalender
-              </button>
-            </div>
           </div>
 
           {/* Card 3: Kebun Pertumbuhan Karir */}
-          <div className="rounded-3xl overflow-hidden bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between p-4 group">
-            <div className="relative h-44 rounded-2xl overflow-hidden mb-4">
+          <div
+            onClick={onGuestClick}
+            className="rounded-3xl overflow-hidden bg-white dark:bg-[#141A15] border border-[#DEE7D0] dark:border-[#232E25] shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col p-4 group cursor-pointer"
+          >
+            <div className="relative h-48 rounded-2xl overflow-hidden mb-4">
               <img
                 src="/images/hero_landscape.jpg"
                 alt="Kebun Karir Gamifikasi"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3 p-2 rounded-xl bg-white/80 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358]">
-                <Flower2 size={16} />
+              <div className="absolute top-3 left-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358] shadow-xs">
+                <Flower2 size={17} />
               </div>
             </div>
-            <div className="space-y-2 flex-1">
+            <div className="space-y-1.5 flex-1 px-1 pb-1">
               <h3 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
                 Kebun Pertumbuhan Karir
               </h3>
@@ -552,31 +453,7 @@ export function LandingPage() {
                 Kumpulkan XP dari setiap lamaran, sirami tanaman virtualmu, jaga streak konsistensi, dan raih badge pencapaian.
               </p>
             </div>
-            <div className="pt-4">
-              <button
-                onClick={onGuestClick}
-                className="w-full rounded-full bg-[#EEF3E2] dark:bg-[#1F2B20] hover:bg-[#556832] hover:text-white dark:hover:bg-[#788B4E] text-[#556832] dark:text-[#E2ECD5] py-2 text-xs font-bold transition-colors cursor-pointer"
-              >
-                Tumbuhkan Kebun
-              </button>
-            </div>
           </div>
-        </div>
-
-        {/* Pagination Dots */}
-        <div className="flex items-center justify-center gap-1.5 mt-8">
-          {[0, 1, 2, 3, 4].map((idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveTabDot(idx)}
-              className={`h-2 rounded-full transition-all cursor-pointer ${
-                activeTabDot === idx
-                  ? "w-6 bg-[#556832] dark:bg-[#9BC358]"
-                  : "w-2 bg-[#D0DBC2] dark:bg-[#28382A]"
-              }`}
-              aria-label={`Halaman Fitur ${idx + 1}`}
-            />
-          ))}
         </div>
       </section>
 
