@@ -4,14 +4,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  KanbanSquare,
-  CalendarCheck,
   Flower2,
   ArrowRight,
   Sun,
   Moon,
   CheckCircle2,
-  ChevronRight,
   Menu,
   X,
 } from "lucide-react";
@@ -211,13 +208,6 @@ export function LandingPage() {
           {/* Subtle gradient overlay to guarantee crystal clear text readability on the left */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#FAF6EE]/95 via-[#FAF6EE]/75 to-transparent dark:from-[#0C100D]/95 dark:via-[#0C100D]/80 dark:to-[#0C100D]/25" />
 
-          {/* Top Pill Tag (Badge without Sparkles symbol) */}
-          <div className="relative z-10 self-start">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-black/40 backdrop-blur-md border border-[#BED0A4] dark:border-white/20 text-[11px] font-bold text-[#2D4526] dark:text-[#E2ECD5] shadow-2xs">
-              <Flower2 size={13} className="text-[#556832] dark:text-[#9BC358]" />
-              <span>Platform Pelacak Karir & Lamaran</span>
-            </div>
-          </div>
 
           {/* Center-Left Bold Typography & CTA */}
           <div className="relative z-10 max-w-lg space-y-4 my-auto pt-6 pb-8">
@@ -342,24 +332,6 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Pill Button CTA */}
-            <div className="pt-3 flex items-center gap-3">
-              <button
-                onClick={onGuestClick}
-                disabled={isLoggingInGuest}
-                className="rounded-full bg-[#556832] hover:bg-[#435327] dark:bg-[#788B4E] dark:hover:bg-[#687a41] text-white px-5 py-2.5 text-xs font-bold shadow-2xs hover:shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
-              >
-                <span>{isLoggingInGuest ? "Memuat..." : "Coba Simulasi Guest"}</span>
-              </button>
-
-              <Link
-                href="/register"
-                className="text-xs font-semibold text-[#556832] dark:text-[#9BC358] hover:underline flex items-center gap-1"
-              >
-                <span>Daftar Akun Baru</span>
-                <ChevronRight size={14} />
-              </Link>
-            </div>
           </div>
         </div>
       </section>
@@ -391,9 +363,6 @@ export function LandingPage() {
                 alt="Papan Kanban Pelacak Lamaran"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358] shadow-xs">
-                <KanbanSquare size={17} />
-              </div>
             </div>
             <div className="space-y-1.5 flex-1 px-1 pb-1">
               <h3 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
@@ -416,9 +385,6 @@ export function LandingPage() {
                 alt="Kalender Agenda Pintar"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358] shadow-xs">
-                <CalendarCheck size={17} />
-              </div>
             </div>
             <div className="space-y-1.5 flex-1 px-1 pb-1">
               <h3 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
@@ -441,9 +407,6 @@ export function LandingPage() {
                 alt="Kebun Karir Gamifikasi"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3 p-2.5 rounded-xl bg-white/90 dark:bg-black/60 backdrop-blur-md text-[#556832] dark:text-[#9BC358] shadow-xs">
-                <Flower2 size={17} />
-              </div>
             </div>
             <div className="space-y-1.5 flex-1 px-1 pb-1">
               <h3 className="font-bold text-sm text-[#242D22] dark:text-[#F1F6F2]">
