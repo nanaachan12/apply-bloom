@@ -279,44 +279,38 @@ export function CalendarGrid({
                       }
                     }
                   }}
-                  className={`relative flex flex-col justify-between p-1.5 sm:p-2.5 rounded-2xl border transition-all text-left cursor-pointer min-h-[54px] sm:min-h-[84px] ${
+                  className={`group relative flex flex-col justify-between p-2 sm:p-2.5 rounded-2xl border transition-all text-left cursor-pointer min-h-[72px] sm:min-h-[88px] overflow-hidden ${
                     cell.isSelected
-                      ? "ring-2 ring-[#788B4E] dark:ring-[#9BC358] bg-[#788B4E]/10 dark:bg-[#788B4E]/20 border-[#788B4E] dark:border-[#9BC358] z-10 shadow-xs"
+                      ? "border-2 border-[#556832] dark:border-[#9BC358] bg-[#556832]/10 dark:bg-[#9BC358]/15 z-10 shadow-xs"
                       : cell.isToday
-                      ? "border-[#788B4E]/60 dark:border-[#9BC358]/60 bg-[#F4F8EC] dark:bg-[#1D261E]"
+                      ? "border-2 border-[#556832]/50 dark:border-[#9BC358]/50 bg-[#F4F8EC]/80 dark:bg-[#1D261E]/80"
                       : cell.isCurrentMonth
-                      ? "bg-white dark:bg-[#141A15] border-[#DEE7D0] dark:border-[#263328] hover:border-[#788B4E]/60 dark:hover:border-[#9BC358]/60"
+                      ? "bg-white dark:bg-[#141A15] border-[#DEE7D0] dark:border-[#263328] hover:border-[#556832]/50 dark:hover:border-[#9BC358]/50 hover:bg-[#FAFBF7] dark:hover:bg-[#182019]"
                       : "bg-[#F8FAF4]/40 dark:bg-[#121713]/40 border-transparent opacity-40 hover:opacity-75"
                   }`}
                 >
-                  {/* Top: Date Number & Today Label */}
-                  <div className="w-full flex items-center justify-between gap-1">
+                  {/* Top: Date Number */}
+                  <div className="w-full flex items-center justify-start">
                     <span
-                      className={`inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-[11px] sm:text-xs rounded-full shrink-0 ${
+                      className={`inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 text-xs rounded-full font-bold transition-all shrink-0 ${
                         cell.isToday
-                          ? "bg-[#788B4E] text-white font-bold shadow-xs"
+                          ? "bg-[#556832] text-white shadow-xs"
                           : cell.isSelected
-                          ? "text-[#788B4E] dark:text-[#9BC358] font-bold"
+                          ? "bg-[#242D22] dark:bg-white text-white dark:text-[#242D22] shadow-xs"
                           : cell.isCurrentMonth
-                          ? "text-[#242D22] dark:text-[#F1F6F2] font-semibold"
-                          : "text-[#7A8E80] dark:text-[#58685C]"
+                          ? "text-[#242D22] dark:text-[#F1F6F2] group-hover:text-[#556832] dark:group-hover:text-[#9BC358]"
+                          : "text-[#8E9F90] dark:text-[#58685C]"
                       }`}
                     >
                       {cell.dayNumber}
                     </span>
-
-                    {cell.isToday && (
-                      <span className="hidden md:inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-[#788B4E]/15 text-[#788B4E] dark:text-[#9BC358] uppercase tracking-wider whitespace-nowrap">
-                        Hari Ini
-                      </span>
-                    )}
                   </div>
 
                   {/* Bottom: Event Indicators */}
                   {hasEvents && (
-                    <div className="w-full mt-1">
+                    <div className="w-full mt-1.5">
                       {/* Mobile Indicator: Colored Dots */}
-                      <div className="flex sm:hidden items-center justify-center gap-0.5">
+                      <div className="flex sm:hidden items-center justify-center gap-1">
                         {dayEvents.slice(0, 3).map((ev) => (
                           <span
                             key={ev.id}
@@ -326,41 +320,39 @@ export function CalendarGrid({
                           />
                         ))}
                         {dayEvents.length > 3 && (
-                          <span className="text-[9px] font-bold text-[#788B4E] dark:text-[#9BC358] ml-0.5">
+                          <span className="text-[9px] font-bold text-[#556832] dark:text-[#9BC358] ml-0.5">
                             +{dayEvents.length - 3}
                           </span>
                         )}
                       </div>
 
-                      {/* Desktop Indicator: Mini Preview Chips */}
+                      {/* Desktop Indicator: Clean Event Title Chips (Readable, No Truncated Text) */}
                       <div className="hidden sm:flex flex-col gap-1 w-full overflow-hidden">
                         {dayEvents.slice(0, 2).map((ev) => {
                           const isDone = Boolean(ev.completedAt);
                           return (
                             <div
                               key={ev.id}
-                              className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md truncate border flex items-center gap-1 ${getChipStyle(
+                              className={`w-full text-[10px] font-semibold px-2 py-0.5 rounded-md truncate border flex items-center gap-1.5 transition-transform hover:scale-[1.02] ${getChipStyle(
                                 ev.type,
                                 isDone
                               )}`}
+                              title={`${ev.title} (${new Date(ev.dueAt).toLocaleTimeString("id-ID", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })})`}
                             >
                               <span
                                 className={`w-1.5 h-1.5 rounded-full shrink-0 ${getDotColor(
                                   ev.type
                                 )}`}
                               />
-                              <span className="font-bold shrink-0">
-                                {new Date(ev.dueAt).toLocaleTimeString("id-ID", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </span>
                               <span className="truncate">{ev.title}</span>
                             </div>
                           );
                         })}
                         {dayEvents.length > 2 && (
-                          <span className="text-[9px] font-semibold text-[#788B4E] dark:text-[#9BC358] pl-1">
+                          <span className="text-[9px] font-bold text-[#556832] dark:text-[#9BC358] pl-1">
                             +{dayEvents.length - 2} agenda lagi
                           </span>
                         )}
@@ -399,8 +391,12 @@ export function CalendarGrid({
             <span>Lainnya</span>
           </div>
           <div className="flex items-center gap-1.5 sm:ml-auto">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#788B4E] inline-block ring-2 ring-[#788B4E]/30" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#556832] inline-block ring-2 ring-[#556832]/30" />
             <span>Hari Ini</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#242D22] dark:bg-white inline-block ring-2 ring-[#556832]" />
+            <span>Dipilih</span>
           </div>
         </div>
       </div>

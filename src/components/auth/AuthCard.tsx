@@ -134,7 +134,7 @@ export function AuthCard({ initialMode }: AuthCardProps) {
           : "Selamat datang! Akun permanen berhasil dibuat."
       );
       triggerRefresh();
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat memproses permintaan.");
     } finally {
@@ -148,7 +148,7 @@ export function AuthCard({ initialMode }: AuthCardProps) {
     try {
       const success = await handleGuestLogin();
       if (success) {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       setError(err.message || "Gagal masuk ke mode simulasi guest");
@@ -368,17 +368,40 @@ export function AuthCard({ initialMode }: AuthCardProps) {
             </div>
           </div>
 
-          {/* 1-Click Guest Simulation Button */}
-          <button
-            type="button"
-            onClick={onGuestLogin}
-            disabled={isGuestLoading}
-            className="w-full rounded-xl border border-[#BED0A4] dark:border-[#2C3E2E] bg-[#EEF3E2]/60 hover:bg-[#EEF3E2] dark:bg-[#1A251B]/60 dark:hover:bg-[#1A251B] text-[#556832] dark:text-[#9BC358] py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 min-h-[42px]"
-            title="Coba langsung tanpa akun pribadi"
-          >
-            <Flower2 size={14} />
-            <span>{isGuestLoading ? "Memuat..." : "Coba Mode Tamu (Simulasi 1-Klik)"}</span>
-          </button>
+          {/* Mode Simulasi (Guest 1-Klik) */}
+          <div className="rounded-2xl bg-gradient-to-br from-[#F8FAF4] to-[#EEF3E2] dark:from-[#151D16] dark:to-[#1C261E] border border-[#BED0A4]/70 dark:border-[#2C3E2E] p-3.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2D4526] dark:text-[#E2ECD5]">
+                <Flower2 size={14} className="text-[#657B3D] dark:text-[#9BC358]" />
+                <span>Mode Simulasi (Tamu)</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#556832]/10 dark:bg-[#9BC358]/20 text-[10px] font-bold text-[#556832] dark:text-[#9BC358]">
+                Instan 1-Klik
+              </span>
+            </div>
+            <p className="text-[11px] text-[#5C6B5E] dark:text-[#9DAEA0] leading-relaxed">
+              Coba langsung fitur pelacak kanban, kalender interview, dan kebun karir tanpa perlu mendaftar akun pribadi.
+            </p>
+            <button
+              type="button"
+              onClick={onGuestLogin}
+              disabled={isGuestLoading}
+              className="w-full rounded-xl bg-white dark:bg-[#233124] hover:bg-[#F3F7EC] dark:hover:bg-[#2B3B2C] border border-[#BED0A4] dark:border-[#384E3A] text-[#3B5023] dark:text-[#D1E6BA] py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 shadow-2xs min-h-[40px]"
+              title="Coba langsung tanpa akun pribadi"
+            >
+              {isGuestLoading ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-[#556832]/30 border-t-[#556832] dark:border-[#9BC358]/30 dark:border-t-[#9BC358] rounded-full animate-spin" />
+                  <span>Membuka Simulasi...</span>
+                </>
+              ) : (
+                <>
+                  <Flower2 size={13} className="text-[#556832] dark:text-[#9BC358]" />
+                  <span>Masuk Mode Simulasi Tamu (1-Klik)</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </main>
 

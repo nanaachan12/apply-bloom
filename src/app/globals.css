@@ -38,15 +38,20 @@
   --color-text-muted: #8E9F90;
 }
 
+@theme {
+  --font-sans: var(--font-quicksand), "Quicksand", system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-quicksand), "Quicksand", system-ui, sans-serif;
+}
+
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-quicksand), "Quicksand", system-ui, -apple-system, sans-serif;
   color: var(--color-text-main);
   background-color: var(--color-canvas-bg);
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-family: var(--font-quicksand), "Quicksand", system-ui, sans-serif;
 }
 
 /* Refined Subtle Micro-Animations */

@@ -137,7 +137,7 @@ export function ReminderModal({
             </option>
             {applications.map((app) => (
               <option key={app.id} value={app.id}>
-                {app.company} — {app.position}
+                {app.company} - {app.position}
               </option>
             ))}
           </select>

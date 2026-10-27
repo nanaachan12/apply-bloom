@@ -10,9 +10,14 @@ import {
   Droplets,
   HelpCircle,
   TrendingUp,
+  Eye,
+  Lock,
+  CheckCircle2,
+  Sparkles,
+  X,
 } from "lucide-react";
 import { useApp } from "@/components/layout/AppLayout";
-import { PlantVisual } from "@/components/garden/PlantVisual";
+import { PlantVisual, PlantStageSvg } from "@/components/garden/PlantVisual";
 import { BadgeGrid } from "@/components/garden/BadgeGrid";
 import { Button } from "@/components/ui/Button";
 import { WireframeSkeleton } from "@/components/ui/WireframeSkeleton";
@@ -34,6 +39,7 @@ export default function BloomGardenPage() {
   const [badges, setBadges] = useState<BadgeDto[]>(cachedBadges || []);
   const [xpHistory, setXpHistory] = useState<XpTransactionDto[]>(cachedHistory || []);
   const [isLoading, setIsLoading] = useState(!hasCache);
+  const [showSilhouetteModal, setShowSilhouetteModal] = useState(false);
   const [bloomieMood, setBloomieMood] = useState<"auto" | "happy" | "sleep" | "celebrate" | "surprised" | "smile">("auto");
   const [isBloomieSmiling, setIsBloomieSmiling] = useState(false);
   const [bloomieSpeech, setBloomieSpeech] = useState<string | null>(null);
@@ -170,6 +176,19 @@ export default function BloomGardenPage() {
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#EDF2E4] dark:bg-[#1E281F] text-[#556534] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A]">
                 <span>Total {currentXp} XP</span>
               </span>
+
+              <button
+                type="button"
+                onClick={() => setShowSilhouetteModal(true)}
+                className="group flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-[#1E281F] hover:bg-[#EEF3E2] dark:hover:bg-[#28382A] text-[#556832] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A] shadow-2xs transition-all cursor-pointer"
+                title="Bocoran Siluet Tanaman Level 1 - 10"
+              >
+                <Eye size={13} className="text-[#556832] dark:text-[#9BC358] group-hover:scale-110 transition-transform" />
+                <span>Bocoran Siluet</span>
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#788B4E]/15 dark:bg-[#9BC358]/20 text-[#556832] dark:text-[#9BC358]">
+                  Lv. 1-10
+                </span>
+              </button>
             </div>
 
             <span className="text-xs text-[#7A8E80]">
@@ -361,6 +380,164 @@ export default function BloomGardenPage() {
           </div>
         </div>
       </div>
+      )}
+
+      {/* Silhouette Preview Modal */}
+      {showSilhouetteModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setShowSilhouetteModal(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-[#182019] rounded-3xl border border-[#DEE7D0] dark:border-[#263328] shadow-2xl flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[#DEE7D0] dark:border-[#263328]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-[#EDF2E4] dark:bg-[#1F2B20] flex items-center justify-center text-[#556832] dark:text-[#9BC358] border border-[#DEE7D0] dark:border-[#28382A]">
+                  <Eye size={18} />
+                </div>
+                <div>
+                  <h3 className="font-heading font-bold text-base sm:text-lg text-[#242D22] dark:text-[#F1F6F2]">
+                    Bocoran Siluet Tanaman (Level 1 - 10)
+                  </h3>
+                  <p className="text-xs text-[#616D64] dark:text-[#A0B2A3]">
+                    Setiap kenaikan level mengubah wujud tanamanmu. Buka siluet aslinya dengan mengumpulkan XP!
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSilhouetteModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[#7A8E80] hover:text-[#242D22] dark:hover:text-[#F1F6F2] hover:bg-[#EDF2E4] dark:hover:bg-[#28382A] transition-colors cursor-pointer"
+                title="Tutup"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body / Grid of 10 Stages */}
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
+              {/* Info & Status Banner */}
+              <div className="p-3 rounded-2xl bg-[#EDF2E4]/80 dark:bg-[#1F2B20]/80 border border-[#DEE7D0] dark:border-[#28382A] flex items-center justify-between flex-wrap gap-2 text-xs">
+                <div className="flex items-center gap-2 text-[#556832] dark:text-[#9BC358]">
+                  <Sparkles size={15} />
+                  <span>
+                    Level kamu saat ini: <strong>Level {currentLevel}</strong> ({PLANT_STAGES[currentStage]?.title || "Benih"})
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-[11px] text-[#616D64] dark:text-[#A0B2A3]">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                    <span>Terbuka (Warna)</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-stone-400 dark:bg-stone-600 inline-block" />
+                    <span>Terkunci (Siluet)</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* 10 Stages Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                {PLANT_STAGES.map((st, idx) => {
+                  const stageLevel = idx + 1;
+                  const isUnlocked = currentLevel >= stageLevel;
+                  const isCurrent = currentLevel === stageLevel;
+
+                  return (
+                    <div
+                      key={st.stage}
+                      className={`relative rounded-2xl p-3 flex flex-col items-center text-center transition-all border ${
+                        isCurrent
+                          ? "bg-[#EDF2E4] dark:bg-[#1F2B20] border-[#788B4E] dark:border-[#9BC358] shadow-xs ring-2 ring-[#788B4E]/30"
+                          : isUnlocked
+                          ? "bg-white dark:bg-[#131A14] border-[#DEE7D0] dark:border-[#263328]"
+                          : "bg-[#F9FAF8] dark:bg-[#141A15] border-[#E8EDE2] dark:border-[#1E2620] opacity-85 hover:opacity-100"
+                      }`}
+                    >
+                      {/* Badge top */}
+                      <div className="w-full flex items-center justify-between gap-1 mb-1">
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                            isCurrent
+                              ? "bg-[#788B4E] text-white"
+                              : isUnlocked
+                              ? "bg-[#EDF2E4] dark:bg-[#1F2B20] text-[#556832] dark:text-[#9BC358]"
+                              : "bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
+                          }`}
+                        >
+                          Lv. {stageLevel}
+                        </span>
+                        {isUnlocked ? (
+                          <span className="flex items-center gap-0.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                            <CheckCircle2 size={12} />
+                            <span>Buka</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-0.5 text-[10px] text-stone-500 dark:text-stone-400 font-medium">
+                            <Lock size={11} />
+                            <span>Kunci</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Plant SVG Container */}
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center my-1">
+                        <PlantStageSvg
+                          stage={idx}
+                          isSilhouette={!isUnlocked}
+                          className="w-20 h-20 sm:w-24 sm:h-24 drop-shadow-2xs"
+                        />
+                        {!isUnlocked && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-6 h-6 rounded-full bg-stone-900/40 dark:bg-stone-100/20 backdrop-blur-2xs flex items-center justify-center text-white dark:text-stone-200 shadow-xs">
+                              <Lock size={11} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stage Details */}
+                      <div className="mt-1 w-full">
+                        <h4
+                          className="font-bold text-xs text-[#242D22] dark:text-[#F1F6F2] truncate"
+                          title={st.name}
+                        >
+                          {st.title}
+                        </h4>
+                        <p className="text-[10px] text-[#7A8E80] dark:text-[#8E9F92] mt-0.5">
+                          {st.minXp} XP
+                        </p>
+                        <p
+                          className="text-[10px] text-[#556832] dark:text-[#9BC358] font-medium mt-1 truncate"
+                          title={st.name}
+                        >
+                          {isUnlocked ? st.name.split(" (")[0] : `Buka di Lv. ${stageLevel}`}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-[#DEE7D0] dark:border-[#263328] bg-[#F8FAF4] dark:bg-[#141A15] flex items-center justify-between text-xs">
+              <span className="text-[#616D64] dark:text-[#A0B2A3]">
+                Tiap lamaran kerja, wawancara, dan siraman menambah XP menuju wujud tanaman berikutnya!
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowSilhouetteModal(false)}
+                className="px-4 py-1.5 rounded-xl bg-[#EDF2E4] dark:bg-[#1E281F] text-[#556832] dark:text-[#9BC358] font-semibold hover:bg-[#DEE7D0] dark:hover:bg-[#28382A] transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

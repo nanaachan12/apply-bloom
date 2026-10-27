@@ -553,7 +553,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const isPublicPage =
-    pathname === "/login" || pathname === "/register" || (!user && pathname === "/");
+    pathname === "/login" || pathname === "/register" || pathname === "/";
 
   // If public page (Landing, Login, Register), render cleanly without app shell
   if (isPublicPage) {
@@ -608,7 +608,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   const getSkeletonType = () => {
-    if (pathname === "/") return "dashboard";
+    if (pathname.startsWith("/dashboard")) return "dashboard";
     if (pathname.startsWith("/pipeline")) return "pipeline";
     if (pathname.startsWith("/applications")) return "applications";
     if (pathname.startsWith("/garden")) return "garden";
@@ -639,23 +639,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Guest Simulation Sticky Mode Top Banner */}
           {isGuest && !isLoadingAuth && (
             <div className="mb-5 p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-[#EEF3E2] dark:bg-[#18231A] border border-[#BED0A4] dark:border-[#2C3E2E] shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#556832] dark:bg-[#788B4E] text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Flower2 size={16} />
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[#242D22] dark:text-[#F1F6F2]">
+                    Mode Simulasi Tamu
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#556832]/15 dark:bg-[#9BC358]/20 text-[#556832] dark:text-[#9BC358]">
+                    Hanya Simulasi
+                  </span>
                 </div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#242D22] dark:text-[#F1F6F2]">
-                      Mode Simulasi Tamu
-                    </span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#556832]/15 dark:bg-[#9BC358]/20 text-[#556832] dark:text-[#9BC358]">
-                      Hanya Simulasi
-                    </span>
-                  </div>
-                  <p className="text-[#5C6B5E] dark:text-[#A0B2A3] leading-relaxed">
-                    Kamu bebas mencoba input data lamaran untuk simulasi. Data ini bersifat sementara dan tidak disimpan secara permanen. Silakan daftar akun untuk menyimpan lamaranmu!
-                  </p>
-                </div>
+                <p className="text-[#5C6B5E] dark:text-[#A0B2A3] leading-relaxed">
+                  Kamu bebas mencoba input data lamaran untuk simulasi. Data ini bersifat sementara dan tidak disimpan secara permanen. Silakan daftar akun untuk menyimpan lamaranmu!
+                </p>
               </div>
 
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">

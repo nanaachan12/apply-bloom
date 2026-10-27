@@ -33,7 +33,7 @@ export function BottomNavbar() {
   }, []);
 
   const navItems: NavItem[] = [
-    { label: "Dashboard", href: "/", icon: LayoutDashboard },
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Lamaran", href: "/applications", icon: Briefcase },
     { label: "Pipeline", href: "/pipeline", icon: KanbanSquare },
     { label: "Agenda", href: "/reminders", icon: CalendarCheck },
@@ -41,7 +41,7 @@ export function BottomNavbar() {
   ];
 
   const activeIndex = navItems.findIndex((item) =>
-    item.href === "/" ? activeTab === "/" : activeTab.startsWith(item.href)
+    item.href === "/dashboard" ? activeTab === "/dashboard" : activeTab.startsWith(item.href)
   );
 
   const safeActiveIndex = activeIndex >= 0 ? activeIndex : 0;

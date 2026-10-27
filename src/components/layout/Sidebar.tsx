@@ -32,7 +32,7 @@ export function Sidebar({
   const { user } = useApp();
 
   const navItems = [
-    { label: "Dashboard", href: "/", icon: LayoutDashboard },
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "My Applications", href: "/applications", icon: Briefcase },
     { label: "Pipeline Board", href: "/pipeline", icon: KanbanSquare },
     { label: "Calendar & Reminders", href: "/reminders", icon: CalendarCheck },
@@ -49,7 +49,9 @@ export function Sidebar({
   }, [pathname]);
 
   const activeIndex = navItems.findIndex((item) =>
-    item.href === "/" ? activePath === "/" : activePath.startsWith(item.href)
+    item.href === "/dashboard"
+      ? activePath === "/dashboard"
+      : activePath.startsWith(item.href)
   );
 
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);

@@ -13,11 +13,7 @@ export interface AwardXpResult {
 }
 
 export function calculatePlantStage(level: number): number {
-  if (level >= 10) return 4;
-  if (level >= 7) return 3;
-  if (level >= 4) return 2;
-  if (level >= 2) return 1;
-  return 0;
+  return Math.min(Math.max(0, level - 1), 9);
 }
 
 export async function awardXp(params: {
